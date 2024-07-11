@@ -63,7 +63,7 @@ class AdminApi(object):
     ):
         """
         慧享(绿城)科技 智慧社区全域服务平台 Class 构造函数
-        :param base_url: 基本url
+        :param base_url: base url
         :param uid: 用户名
         :param pwd: 密码
         :param diskcache: diskcache.core.Cache
@@ -79,7 +79,7 @@ class AdminApi(object):
     @property
     def base_url(self):
         """
-        基本url
+        base url
         :return:
         """
         return self._base_url[:-1] if self._base_url.endswith("/") else self._base_url
