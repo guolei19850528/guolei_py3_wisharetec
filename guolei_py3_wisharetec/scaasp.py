@@ -1877,7 +1877,7 @@ class AdminApi(object):
             if isinstance(exports, list):
                 for i in exports:
                     if isinstance(i.id, int) and i.id == export_id:
-                        print(i)
+                        print(datetime.now(), i)
                         if isinstance(i.status, int) and i.status == 2:
                             export = i
                             break
