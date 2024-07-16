@@ -1866,9 +1866,9 @@ class AdminApi(object):
                 requests_request_args: Iterable = (),
                 requests_request_kwargs: dict = {}
         ):
-            print(
-                f"{datetime.now()} exec download_export({export_id},{export_fp},{requests_response_callable},{requests_request_args},{requests_request_kwargs})")
-            exports = self.query_exports(
+            # print(
+            #     f"{datetime.now()} exec download_export({export_id},{export_fp},{requests_response_callable},{requests_request_args},{requests_request_kwargs})")
+            exports = self.login_with_cache().query_exports(
                 requests_response_callable=requests_response_callable,
                 requests_request_args=requests_request_args,
                 requests_request_kwargs=requests_request_kwargs
@@ -1891,7 +1891,7 @@ class AdminApi(object):
                         f.write(response.content)
                     return export_fp
             raise Exception(
-                f"{datetime.now()} exec download_export({export_id},{export_fp},{requests_response_callable},{requests_request_args},{requests_request_kwargs})")
+                f"{datetime.now()} retry exec download_export({export_id},{export_fp},{requests_response_callable},{requests_request_args},{requests_request_kwargs}) {export}")
 
         return _retry_func(
             export_fp=export_fp,
