@@ -1354,6 +1354,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "method": "GET",
@@ -1428,6 +1429,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "url": f"{self.base_url}/manage/communityRoom/exportDelayCommunityRoomList",
@@ -1497,6 +1499,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "url": f"{self.base_url}/manage/user/information/register/list/export",
@@ -1566,6 +1569,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "url": f"{self.base_url}/manage/user/information/unregister/list/export",
@@ -1635,6 +1639,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "url": f"{self.base_url}/manage/order/work/export",
@@ -1704,6 +1709,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "url": f"{self.base_url}/manage/goods/exportShopGoods",
@@ -1773,6 +1779,7 @@ class AdminApi(object):
         :return:
         """
         requests_request_kwargs_params = Dict(requests_request_kwargs_params)
+        requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
                 "url": f"{self.base_url}/manage/storeProduct/exportStoreProductList",
