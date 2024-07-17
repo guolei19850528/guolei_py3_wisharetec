@@ -875,6 +875,46 @@ class AdminApi(object):
             requests_request_kwargs=requests_request_kwargs
         )
 
+    def update_store_goods_status(
+            self,
+            requests_request_kwargs_data: dict = {},
+            requests_response_callable: Callable = RequestsResponseCallable.status_code_200_json_addict_status_100_data,
+            requests_request_args: Iterable = (),
+            requests_request_kwargs: dict = {},
+    ) -> bool:
+        """
+        更新门店商品上下架状态
+        :param requests_request_kwargs_data:
+        :param requests_response_callable: RequestsResponseCallable.status_code_200_json_addict_status_100_data
+        :param requests_request_args: requests_request(requests_response_callable,requests_request_args,requests_request_kwargs)
+        :param requests_request_kwargs: requests_request(requests_response_callable,requests_request_args,requests_request_kwargs)
+        :return:
+        """
+        requests_request_kwargs_data = Dict(requests_request_kwargs_data)
+        requests_request_kwargs = Dict(requests_request_kwargs)
+        requests_request_kwargs = Dict(
+            {
+                "url": f"{self.base_url}/manage/storeProduct/updateProductStatus",
+                "method": "PUT",
+                "headers": {
+                    "Token": Dict(self.token_data).token if isinstance(Dict(self.token_data).token, str) else "",
+                    "Companycode": Dict(self.token_data).companyCode if isinstance(Dict(self.token_data).companyCode,
+                                                                                   str) else "",
+                    **requests_request_kwargs.headers,
+                },
+                "data": {
+                    **requests_request_kwargs_data,
+                    **requests_request_kwargs.data,
+                },
+                **requests_request_kwargs,
+            }
+        )
+        return requests_request(
+            requests_response_callable=requests_response_callable,
+            requests_request_args=requests_request_args,
+            requests_request_kwargs=requests_request_kwargs
+        )
+
     def query_parking_auth_audits(
             self,
             requests_request_kwargs_params: dict = {},
