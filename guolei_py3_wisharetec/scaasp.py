@@ -1878,7 +1878,7 @@ class AdminApi(object):
             requests_request_kwargs: dict = {},
             retry_args: Iterable = (),
             retry_kwargs: dict = {},
-    ) -> Union[str]:
+    ):
         """
         下载数据导出文件
         :param export_id:
