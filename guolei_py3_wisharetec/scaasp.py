@@ -635,7 +635,7 @@ class AdminApi(object):
 
     def save_shop_product_store_edits(
             self,
-            requests_request_kwargs_json: Union[dict, dict] = Dict({}),
+            requests_request_kwargs_json: dict = {},
             requests_response_callable: Callable = RequestsResponseCallable.status_code_200_json_addict_status_100,
             requests_request_args: Iterable = (),
             requests_request_kwargs: dict = {}
@@ -675,7 +675,7 @@ class AdminApi(object):
 
     def save_shop_product(
             self,
-            requests_request_kwargs_json: Union[dict, dict] = Dict({}),
+            requests_request_kwargs_json: dict = {},
             requests_response_callable: Callable = RequestsResponseCallable.status_code_200_json_addict_status_100,
             requests_request_args: Iterable = (),
             requests_request_kwargs: dict = {}
