@@ -2180,3 +2180,42 @@ class AdminApi(object):
             requests_request_args=requests_request_args,
             requests_request_kwargs=requests_request_kwargs
         )
+
+    def query_shop_product_categories(
+            self,
+            shop_id: str = "",
+            requests_response_callable: Callable = RequestsResponseCallable.status_code_200_json_addict_status_100_data,
+            requests_request_args: Iterable = (),
+            requests_request_kwargs: dict = {},
+    ):
+        """
+        查询商家自定义分类
+        :param shop_id:
+        :param requests_response_callable: RequestsResponseCallable.status_code_200_json_addict_status_100_data
+        :param requests_request_args: requests_request(requests_response_callable,requests_request_args,requests_request_kwargs)
+        :param requests_request_kwargs: requests_request(requests_response_callable,requests_request_args,requests_request_kwargs)
+        :return:
+        """
+        requests_request_kwargs = Dict(requests_request_kwargs)
+        requests_request_kwargs = Dict(
+            {
+                "url": f"{self.base_url}/manage/productCategory/getProductCategoryList",
+                "method": "GET",
+                "headers": {
+                    "Token": Dict(self.token_data).token if isinstance(Dict(self.token_data).token, str) else "",
+                    "Companycode": Dict(self.token_data).companyCode if isinstance(Dict(self.token_data).companyCode,
+                                                                                   str) else "",
+                    **requests_request_kwargs.headers,
+                },
+                "params": {
+                    "busId": shop_id,
+                    **requests_request_kwargs.params,
+                },
+                **requests_request_kwargs,
+            }
+        )
+        return requests_request(
+            requests_response_callable=requests_response_callable,
+            requests_request_args=requests_request_args,
+            requests_request_kwargs=requests_request_kwargs
+        )
