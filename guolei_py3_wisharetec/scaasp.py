@@ -692,7 +692,7 @@ class AdminApi(object):
         requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs = Dict(
             {
-                "url": f"{self.base_url}/manage/shopGoods/updateShopGoods",
+                "url": f"{self.base_url}/manage/shopGoods/saveSysShopGoods",
                 "method": "POST",
                 "headers": {
                     "Token": Dict(self.token_data).token if isinstance(Dict(self.token_data).token, str) else "",
@@ -709,6 +709,7 @@ class AdminApi(object):
         )
         if isinstance(requests_request_kwargs_json.id, str) and len(requests_request_kwargs_json.id):
             requests_request_kwargs.method = "PUT"
+            requests_request_kwargs.url = f"{self.base_url}/manage/shopGoods/updateShopGoods"
         return requests_request(
             requests_response_callable=requests_response_callable,
             requests_request_args=requests_request_args,
