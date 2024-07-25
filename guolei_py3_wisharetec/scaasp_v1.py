@@ -81,7 +81,7 @@ class AdminApi(object):
         self._token_data = {}
         self._cache_diskcache_instance = cache_diskcache_instance
         self._cache_strict_redis_instance = cache_strict_redis_instance
-        self._is_must_login = False
+        self._is_use_token = False
 
     @property
     def base_url(self) -> str:
@@ -203,7 +203,7 @@ class AdminApi(object):
         requests_request_kwargs = Dict(requests_request_kwargs)
         requests_request_kwargs.setdefault("method", "GET")
         requests_request_kwargs.setdefault("url", f"{self.base_url}{path}")
-        if self._is_must_login:
+        if self._is_use_token:
             token_data = Dict(self.token_data)
             token_data.setdefault("token", "")
             token_data.setdefault("Companycode", "")
@@ -335,7 +335,7 @@ class AdminApi(object):
                         value=json.dumps(self.token_data),
                         time=cache_expire
                     )
-        self._is_must_login = True
+        self._is_use_token = True
         return self
 
     def login_with_diskcache(
@@ -383,7 +383,7 @@ class AdminApi(object):
                         value=self.token_data,
                         expire=cache_expire
                     )
-        self._is_must_login = True
+        self._is_use_token = True
         return self
 
     def login_with_cache(
@@ -431,5 +431,5 @@ class AdminApi(object):
                 login_requests_request_kwargs=login_requests_request_kwargs
             )
         self.login()
-        self._is_must_login = True
+        self._is_use_token = True
         return self
