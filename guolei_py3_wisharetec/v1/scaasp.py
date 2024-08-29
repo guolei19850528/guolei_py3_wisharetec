@@ -21,22 +21,22 @@ class AdminApi(object):
             base_url: str = "",
             username: str = "",
             password: str = "",
-            disckcache_cache_instance: diskcache.Cache = None,
-            redis_cache_instance: Union[redis.Redis, redis.StrictRedis] = None,
+            diskcache_instance: diskcache.Cache = None,
+            redis_instance: Union[redis.Redis, redis.StrictRedis] = None,
     ):
         """
         Admin Api Class 构造函数
         :param base_url: Admin Api Base URL
         :param username: Admin Api Username
         :param password: Admin Api Password
-        :param disckcache_cache_instance: Admin Api Disk Cache Instance
-        :param redis_cache_instance: Admin Api Redis Instance
+        :param diskcache_instance: Admin Api Disk Cache Instance
+        :param redis_instance: Admin Api Redis Instance
         """
         self._base_url = base_url
         self._username = username
         self._password = password
-        self._disckcache_cache_instance = disckcache_cache_instance
-        self._redis_cache_instance = redis_cache_instance
+        self._diskcache_instance = diskcache_instance
+        self._redis_instance = redis_instance
         self._token_data = {}
 
     @property
@@ -91,38 +91,38 @@ class AdminApi(object):
         self._password = value
 
     @property
-    def disckcache_cache_instance(self):
+    def diskcache_instance(self):
         """
         Admin Api Disk Cache Instance
         :return:
         """
-        return self._disckcache_cache_instance
+        return self._diskcache_instance
 
-    @disckcache_cache_instance.setter
-    def disckcache_cache_instance(self, value):
+    @diskcache_instance.setter
+    def diskcache_instance(self, value):
         """
         Admin Api Disk Cache Instance
         :param value:
         :return:
         """
-        self._disckcache_cache_instance = value
+        self._diskcache_instance = value
 
     @property
-    def redis_cache_instance(self):
+    def redis_instance(self):
         """
         Admin Api Redis Instance
         :return:
         """
-        return self._redis_cache_instance
+        return self._redis_instance
 
-    @redis_cache_instance.setter
-    def redis_cache_instance(self, value):
+    @redis_instance.setter
+    def redis_instance(self, value):
         """
         Admin Api Redis Instance
         :param value:
         :return:
         """
-        self._redis_cache_instance = value
+        self._redis_instance = value
 
     @property
     def token_data(self):
@@ -143,25 +143,25 @@ class AdminApi(object):
 
     def check_manage_login(
             self,
-            path: str = "/old/serverUserAction!checkSession.action",
+            requests_request_func_kwargs_url_path: str = "/old/serverUserAction!checkSession.action",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         check manage login
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return: bool,response.status_code,response.text
         """
         if not isinstance(self.base_url, str):
             raise TypeError("self.base_url must be a string")
         if not len(self.base_url):
             raise ValueError("self.base_url must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
@@ -171,7 +171,7 @@ class AdminApi(object):
                 self.token_data.get("companyCode", "")):
             return False, None, None
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -182,24 +182,23 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             return "null" in response.text.strip(), response.status_code, response.text
         return False, response.status_code, response.text
 
     def manage_login(
             self,
-            path: str = "/manage/login",
+            requests_request_func_kwargs_url_path: str = "/manage/login",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         manage login
-        :param path:
-         requests.request.args
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs: requests.request.kwargs
-        :param requests_response_callable: requests.response.callable
-        :return: bool,response.status_code,response.json()
+        :param requests_request_func_response_callable: 
+        :return:
         """
         if not isinstance(self.base_url, str):
             raise TypeError("self.base_url must be a string")
@@ -213,15 +212,15 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "POST")
         requests_request_func_kwargs.data = Dict({
             **{
@@ -233,14 +232,14 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(json_addict.get("status", -1)) == 100:
                 if len(json_addict.get("data", {}).keys()):
                     self.token_data = json_addict.data.to_dict()
                     return True, response.status_code, json_addict
-        return False, response.status_code, Dict({})
+        return False, response.status_code, Dict(response.json())
 
     def manage_login_with_diskcache(
             self,
@@ -248,7 +247,7 @@ class AdminApi(object):
             check_manage_login_func_kwargs: dict = {},
             mange_login_func_kwargs: dict = {},
     ):
-        if isinstance(self.disckcache_cache_instance, diskcache.Cache):
+        if isinstance(self.diskcache_instance, diskcache.Cache):
             cache_key = "_".join([
                 "guolei_py3_wisharetec",
                 "v1",
@@ -259,12 +258,12 @@ class AdminApi(object):
                 f"{hashlib.md5(self.base_url.encode('utf-8')).hexdigest()}",
                 f"{self.username}",
             ])
-            self.token_data = self.disckcache_cache_instance.get(key=cache_key, default={})
+            self.token_data = self.diskcache_instance.get(key=cache_key, default={})
             state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
             if not state:
                 state, _, _ = self.manage_login(**mange_login_func_kwargs)
                 if state:
-                    self.disckcache_cache_instance.set(key=cache_key, value=self.token_data, expire=expire_time)
+                    self.diskcache_instance.set(key=cache_key, value=self.token_data, expire=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
         return self
@@ -275,7 +274,7 @@ class AdminApi(object):
             check_manage_login_func_kwargs: dict = {},
             mange_login_func_kwargs: dict = {},
     ):
-        if isinstance(self.redis_cache_instance, (redis.Redis, redis.StrictRedis)):
+        if isinstance(self.redis_instance, (redis.Redis, redis.StrictRedis)):
             cache_key = "_".join([
                 "guolei_py3_wisharetec",
                 "v1",
@@ -286,14 +285,14 @@ class AdminApi(object):
                 f"{hashlib.md5(self.base_url.encode('utf-8')).hexdigest()}",
                 f"{self.username}",
             ])
-            if isinstance(self.redis_cache_instance.get(name=cache_key), str) and len(
-                    self.redis_cache_instance.get(name=cache_key)):
-                self.token_data = json.loads(self.redis_cache_instance.get(name=cache_key))
+            if isinstance(self.redis_instance.get(name=cache_key), str) and len(
+                    self.redis_instance.get(name=cache_key)):
+                self.token_data = json.loads(self.redis_instance.get(name=cache_key))
                 state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
                 if not state:
                     state, _, _ = self.manage_login(**mange_login_func_kwargs)
                     if state:
-                        self.redis_cache_instance.setex(name=cache_key, value=self.token_data, time=expire_time)
+                        self.redis_instance.setex(name=cache_key, value=self.token_data, time=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
         return self
@@ -301,16 +300,16 @@ class AdminApi(object):
     def manage_communityInfo_getAdminCommunityList(
             self,
             requests_request_func_kwargs_params: dict = {},
-            path: str = "/manage/communityInfo/getAdminCommunityList",
+            requests_request_func_kwargs_url_path: str = "/manage/communityInfo/getAdminCommunityList",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>项目管理
         :param requests_request_func_kwargs_params:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -325,18 +324,19 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
         requests_request_func_kwargs_params.setdefault("curPage", 1)
         requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -351,8 +351,8 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -361,16 +361,16 @@ class AdminApi(object):
     def manage_communityRoom_listCommunityRoom(
             self,
             requests_request_func_kwargs_params: dict = {},
-            path: str = "/manage/communityRoom/listCommunityRoom",
+            requests_request_func_kwargs_url_path: str = "/manage/communityRoom/listCommunityRoom",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>房号管理=>有效房号
         :param requests_request_func_kwargs_params:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -385,18 +385,19 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
         requests_request_func_kwargs_params.setdefault("curPage", 1)
         requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = {
             **{
@@ -411,8 +412,8 @@ class AdminApi(object):
         }
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -421,16 +422,16 @@ class AdminApi(object):
     def manage_communityRoom_getFullRoomInfo(
             self,
             id: Union[str, int] = "",
-            path: str = "/manage/communityRoom/getFullRoomInfo",
+            requests_request_func_kwargs_url_path: str = "/manage/communityRoom/getFullRoomInfo",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>房号管理=>有效房号=>查看
         :param id:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -445,10 +446,10 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         if isinstance(id, str) and not len(id):
             raise ValueError("id must be a string and not empty")
         if int(id) <= 0:
@@ -457,7 +458,7 @@ class AdminApi(object):
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = {
             **{
@@ -474,8 +475,8 @@ class AdminApi(object):
         }
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -484,16 +485,16 @@ class AdminApi(object):
     def manage_user_register_list(
             self,
             requests_request_func_kwargs_params: dict = {},
-            path: str = "/manage/user/register/list",
+            requests_request_func_kwargs_url_path: str = "/manage/user/register/list",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>用户管理=>注册用户管理
         :param requests_request_func_kwargs_params:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -508,18 +509,19 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
         requests_request_func_kwargs_params.setdefault("curPage", 1)
         requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -534,8 +536,8 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -544,16 +546,16 @@ class AdminApi(object):
     def manage_user_register_detail(
             self,
             id: str = "",
-            path: str = "/manage/user/register/detail",
+            requests_request_func_kwargs_url_path: str = "/manage/user/register/detail",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>用户管理=>注册用户管理=>查看
         :param id:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -568,10 +570,10 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         if not isinstance(id, str):
             raise TypeError("id must be a string")
         if not len(id):
@@ -580,7 +582,7 @@ class AdminApi(object):
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -597,8 +599,8 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -607,16 +609,16 @@ class AdminApi(object):
     def manage_user_information_register_list(
             self,
             requests_request_func_kwargs_params: dict = {},
-            path: str = "/manage/user/information/register/list",
+            requests_request_func_kwargs_url_path: str = "/manage/user/information/register/list",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>用户管理=>注册业主管理
         :param requests_request_func_kwargs_params:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -631,18 +633,19 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
         requests_request_func_kwargs_params.setdefault("curPage", 1)
         requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -657,8 +660,8 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -669,18 +672,18 @@ class AdminApi(object):
             id: str = "",
             org_id: Union[str, int] = "",
             community_id: str = "",
-            path: str = "manage/user/information/register/detail",
+            requests_request_func_kwargs_url_path: str = "/manage/user/information/register/detail",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>用户管理=>注册业主管理=>查看
         :param community_id:
         :param org_id:
         :param id:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -695,10 +698,10 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         if not isinstance(id, str):
             raise TypeError("id must be a string")
         if not len(id):
@@ -715,7 +718,7 @@ class AdminApi(object):
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -734,8 +737,8 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -744,16 +747,16 @@ class AdminApi(object):
     def manage_user_information_unregister_list(
             self,
             requests_request_func_kwargs_params: dict = {},
-            path: str = "/manage/user/information/unregister/list",
+            requests_request_func_kwargs_url_path: str = "/manage/user/information/unregister/list",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>用户管理=>未注册业主管理
         :param requests_request_func_kwargs_params:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -768,18 +771,19 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         self.token_data = Dict(self.token_data).to_dict()
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
         requests_request_func_kwargs_params.setdefault("curPage", 1)
         requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -794,8 +798,8 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -805,18 +809,18 @@ class AdminApi(object):
             self,
             id: str = "",
             community_id: str = "",
-            path: str = "manage/user/information/unregister/detail",
+            requests_request_func_kwargs_url_path: str = "/manage/user/information/unregister/detail",
             requests_request_func_kwargs: dict = {},
-            requests_response_callable: Callable = None
+            requests_request_func_response_callable: Callable = None
     ):
         """
         业户中心=>用户管理=>未注册业主管理=>查看
         :param community_id:
         :param org_id:
         :param id:
-        :param path:
+        :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
-        :param requests_response_callable:
+        :param requests_request_func_response_callable:
         :return:
         """
         if not isinstance(self.base_url, str):
@@ -831,10 +835,10 @@ class AdminApi(object):
             raise TypeError("self.password must be a string")
         if not len(self.password):
             raise ValueError("self.password must be a string and not empty")
-        if not isinstance(path, str):
-            raise TypeError("path must be a string")
-        if not len(path):
-            raise ValueError("path must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
         if not isinstance(id, str):
             raise TypeError("id must be a string")
         if not len(id):
@@ -847,7 +851,7 @@ class AdminApi(object):
         self.token_data.setdefault("token", "")
         self.token_data.setdefault("companyCode", "")
         requests_request_func_kwargs = Dict(requests_request_func_kwargs)
-        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{path}")
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
         requests_request_func_kwargs.setdefault("method", "GET")
         requests_request_func_kwargs.headers = Dict({
             **{
@@ -865,8 +869,574 @@ class AdminApi(object):
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_response_callable, Callable):
-                return requests_response_callable(response=response)
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_shopGoods_getAdminShopGoods(
+            self,
+            requests_request_func_kwargs_params: dict = {},
+            requests_request_func_kwargs_url_path: str = "/manage/shopGoods/getAdminShopGoods",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>商品管理=>商家产品
+        :param requests_request_func_kwargs_params:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
+        requests_request_func_kwargs_params.setdefault("curPage", 1)
+        requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **requests_request_func_kwargs_params,
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_shopGoods_getShopGoodsDetail(
+            self,
+            id: str = "",
+            requests_request_func_kwargs_url_path: str = "/manage/shopGoods/getShopGoodsDetail",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>商品管理=>商家产品=>查看
+        :param id:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        if not isinstance(id, str):
+            raise TypeError("id must be a string")
+        if not len(id):
+            raise ValueError("id must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **{
+                "id": id,
+            },
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_shopGoods_getGoodsStoreEdits(
+            self,
+            id: str = "",
+            requests_request_func_kwargs_url_path: str = "/manage/shopGoods/getGoodsStoreEdits",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>商品管理=>商家产品=>推送到门店商品
+        :param id:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        if not isinstance(id, str):
+            raise TypeError("id must be a string")
+        if not len(id):
+            raise ValueError("id must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **{
+                "id": id,
+            },
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_storeProduct_getAdminStoreProductList(
+            self,
+            requests_request_func_kwargs_params: dict = {},
+            requests_request_func_kwargs_url_path: str = "/manage/storeProduct/getAdminStoreProductList",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>商品管理=>门店商品
+        :param requests_request_func_kwargs_params:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
+        requests_request_func_kwargs_params.setdefault("curPage", 1)
+        requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **requests_request_func_kwargs_params,
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_storeProduct_getStoreProductInfo(
+            self,
+            id: str = "",
+            requests_request_func_kwargs_url_path: str = "/manage/storeProduct/getStoreProductInfo",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>商品管理=>门店商品=>查看
+        :param id:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        if not isinstance(id, str):
+            raise TypeError("id must be a string")
+        if not len(id):
+            raise ValueError("id must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **{
+                "id": id,
+            },
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_businessOrderShu_list(
+            self,
+            requests_request_func_kwargs_params: dict = {},
+            requests_request_func_kwargs_url_path: str = "/manage/businessOrderShu/list",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>订单管理=>商业订单
+        :param requests_request_func_kwargs_params:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
+        requests_request_func_kwargs_params.setdefault("curPage", 1)
+        requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
+        requests_request_func_kwargs_params.setdefault("subHandle", 1)
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **requests_request_func_kwargs_params,
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_businessOrderShu_view(
+            self,
+            id: str = "",
+            order_type: int = 1,
+            requests_request_func_kwargs_url_path: str = "/manage/businessOrderShu/view",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        生活服务=>订单管理=>商业订单=>查看
+        :param id:
+        :param order_type:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        if not isinstance(id, str):
+            raise TypeError("id must be a string")
+        if not len(id):
+            raise ValueError("id must be a string and not empty")
+        if not isinstance(order_type, int):
+            order_type = 1
+        order_type = int(order_type)
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **{
+                "id": id,
+                "orderType": order_type,
+            },
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_carParkApplication_carParkCard_list(
+            self,
+            requests_request_func_kwargs_params: dict = {},
+            requests_request_func_kwargs_url_path: str = "/manage/carParkApplication/carParkCard/list",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        智慧物联 > 车场管理 > 停车管理 > 停车授权管理
+        :param requests_request_func_kwargs_params:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
+        requests_request_func_kwargs_params.setdefault("curPage", 1)
+        requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **requests_request_func_kwargs_params,
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response.status_code, json_addict.data
+        return False, response.status_code, Dict(response.json())
+
+    def manage_carParkApplication_carParkCard(
+            self,
+            id: Union[int, str] = "",
+            requests_request_func_kwargs_url_path: str = "/manage/carParkApplication/carParkCard",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        智慧物联 > 车场管理 > 停车管理 > 停车授权管理 > 编辑
+        :param id:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        if isinstance(id, str) and not len(id):
+            raise ValueError("id must be a string and not empty")
+        if int(id) <= 0:
+            raise ValueError("id must be a positive integer")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **{
+                "id": id,
+            },
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            if isinstance(requests_request_func_response_callable, Callable):
+                return requests_request_func_response_callable(response=response)
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
