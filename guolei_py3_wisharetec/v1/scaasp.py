@@ -183,7 +183,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             return "null" in response.text.strip(), response.status_code, response.text
         return False, response.status_code, response.text
 
@@ -233,7 +233,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(json_addict.get("status", -1)) == 100:
                 if len(json_addict.get("data", {}).keys()):
@@ -305,7 +305,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>项目管理
+        业户中心 > 项目管理
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -352,7 +352,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -366,7 +366,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>房号管理=>有效房号
+        业户中心 > 房号管理 > 有效房号
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -413,7 +413,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -427,7 +427,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>房号管理=>有效房号=>查看
+        业户中心 > 房号管理 > 有效房号 > 查看
         :param id:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -476,7 +476,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -490,7 +490,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>用户管理=>注册用户管理
+        业户中心 > 用户管理 > 注册用户管理
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -537,7 +537,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -551,7 +551,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>用户管理=>注册用户管理=>查看
+        业户中心 > 用户管理 > 注册用户管理 > 查看
         :param id:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -600,7 +600,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -614,7 +614,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>用户管理=>注册业主管理
+        业户中心 > 用户管理 > 注册业主管理
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -661,7 +661,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -677,7 +677,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>用户管理=>注册业主管理=>查看
+        业户中心 > 用户管理 > 注册业主管理 > 查看
         :param community_id:
         :param org_id:
         :param id:
@@ -738,7 +738,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -752,7 +752,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>用户管理=>未注册业主管理
+        业户中心 > 用户管理 > 未注册业主管理
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -799,7 +799,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -814,7 +814,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        业户中心=>用户管理=>未注册业主管理=>查看
+        业户中心 > 用户管理 > 未注册业主管理 > 查看
         :param community_id:
         :param org_id:
         :param id:
@@ -870,7 +870,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -884,7 +884,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>商品管理=>商家产品
+        生活服务 > 商品管理 > 商家产品
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -931,7 +931,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -945,7 +945,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>商品管理=>商家产品=>查看
+        生活服务 > 商品管理 > 商家产品 > 查看
         :param id:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -994,7 +994,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1008,7 +1008,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>商品管理=>商家产品=>推送到门店商品
+        生活服务 > 商品管理 > 商家产品 > 推送到门店商品
         :param id:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -1057,7 +1057,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1071,7 +1071,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>商品管理=>门店商品=>保存
+        生活服务 > 商品管理 > 门店商品 > 保存
         :param requests_request_func_kwargs_json:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -1115,7 +1115,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1129,7 +1129,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>商品管理=>门店商品
+        生活服务 > 商品管理 > 门店商品
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -1176,7 +1176,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1190,7 +1190,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>商品管理=>门店商品=>查看
+        生活服务 > 商品管理 > 门店商品 > 查看
         :param id:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -1239,7 +1239,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1253,7 +1253,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>订单管理=>商业订单
+        生活服务 > 订单管理 > 商业订单
         :param requests_request_func_kwargs_params:
         :param requests_request_func_kwargs_url_path:
         :param requests_request_func_kwargs:
@@ -1301,7 +1301,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1316,7 +1316,7 @@ class AdminApi(object):
             requests_request_func_response_callable: Callable = None
     ):
         """
-        生活服务=>订单管理=>商业订单=>查看
+        生活服务 > 订单管理 > 商业订单 > 查看
         :param id:
         :param order_type:
         :param requests_request_func_kwargs_url_path:
@@ -1370,7 +1370,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1431,7 +1431,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1494,7 +1494,7 @@ class AdminApi(object):
         response = requests.request(**requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
             if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response=response)
+                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
