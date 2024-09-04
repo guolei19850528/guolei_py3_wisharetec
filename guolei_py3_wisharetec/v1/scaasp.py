@@ -259,10 +259,10 @@ class AdminApi(object):
                 f"{self.username}",
             ])
             self.token_data = self.diskcache_instance.get(key=cache_key, default={})
-            state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
-            if not state:
-                state, _, _ = self.manage_login(**mange_login_func_kwargs)
-                if state:
+            request_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
+            if not request_state:
+                request_state, _, _ = self.manage_login(**mange_login_func_kwargs)
+                if request_state:
                     self.diskcache_instance.set(key=cache_key, value=self.token_data, expire=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
@@ -288,10 +288,10 @@ class AdminApi(object):
             if isinstance(self.redis_instance.get(name=cache_key), str) and len(
                     self.redis_instance.get(name=cache_key)):
                 self.token_data = json.loads(self.redis_instance.get(name=cache_key))
-                state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
-                if not state:
-                    state, _, _ = self.manage_login(**mange_login_func_kwargs)
-                    if state:
+                request_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
+                if not request_state:
+                    request_state, _, _ = self.manage_login(**mange_login_func_kwargs)
+                    if request_state:
                         self.redis_instance.setex(name=cache_key, value=self.token_data, time=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
