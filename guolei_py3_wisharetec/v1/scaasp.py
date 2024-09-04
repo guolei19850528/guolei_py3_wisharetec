@@ -181,9 +181,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.headers,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             return "null" in response.text.strip(), response.status_code, response.text
         return False, response.status_code, response.text
 
@@ -231,9 +231,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.data,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(json_addict.get("status", -1)) == 100:
                 if len(json_addict.get("data", {}).keys()):
@@ -350,9 +350,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -411,9 +411,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params
         }
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -474,9 +474,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params
         }
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -535,9 +535,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -598,9 +598,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -659,9 +659,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -736,9 +736,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -797,9 +797,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -868,9 +868,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -929,9 +929,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -992,9 +992,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1055,9 +1055,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1113,9 +1113,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.json,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1174,9 +1174,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1237,9 +1237,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1299,9 +1299,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1368,9 +1368,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1429,9 +1429,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
@@ -1492,9 +1492,9 @@ class AdminApi(object):
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            if isinstance(requests_request_func_response_callable, Callable):
-                return requests_request_func_response_callable(response,requests_request_func_kwargs.to_dict())
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
                 return True, response.status_code, json_addict.data
