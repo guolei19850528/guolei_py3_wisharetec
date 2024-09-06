@@ -184,8 +184,8 @@ class AdminApi(object):
         if isinstance(requests_request_func_response_callable, Callable):
             return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
-            return "null" in response.text.strip(), response.status_code, response.text
-        return False, response.status_code, response.text
+            return "null" in response.text.strip(), response, response.text
+        return False, response, response.json()
 
     def manage_login(
             self,
@@ -238,8 +238,8 @@ class AdminApi(object):
             if int(json_addict.get("status", -1)) == 100:
                 if len(json_addict.get("data", {}).keys()):
                     self.token_data = json_addict.data.to_dict()
-                    return True, response.status_code, json_addict
-        return False, response.status_code, response.text
+                    return True, response, json_addict
+        return False, response, response.json()
 
     def manage_login_with_diskcache(
             self,
@@ -259,10 +259,10 @@ class AdminApi(object):
                 f"{self.username}",
             ])
             self.token_data = self.diskcache_instance.get(key=cache_key, default={})
-            request_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
-            if not request_state:
-                request_state, _, _ = self.manage_login(**mange_login_func_kwargs)
-                if request_state:
+            request_response_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
+            if not request_response_state:
+                request_response_state, _, _ = self.manage_login(**mange_login_func_kwargs)
+                if request_response_state:
                     self.diskcache_instance.set(key=cache_key, value=self.token_data, expire=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
@@ -288,10 +288,10 @@ class AdminApi(object):
             if isinstance(self.redis_instance.get(name=cache_key), str) and len(
                     self.redis_instance.get(name=cache_key)):
                 self.token_data = json.loads(self.redis_instance.get(name=cache_key))
-                request_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
-                if not request_state:
-                    request_state, _, _ = self.manage_login(**mange_login_func_kwargs)
-                    if request_state:
+                request_response_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
+                if not request_response_state:
+                    request_response_state, _, _ = self.manage_login(**mange_login_func_kwargs)
+                    if request_response_state:
                         self.redis_instance.setex(name=cache_key, value=self.token_data, time=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
@@ -355,8 +355,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_communityRoom_listCommunityRoom(
             self,
@@ -416,8 +416,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_communityRoom_getFullRoomInfo(
             self,
@@ -479,8 +479,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_user_register_list(
             self,
@@ -540,8 +540,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_user_register_detail(
             self,
@@ -603,8 +603,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_user_information_register_list(
             self,
@@ -664,8 +664,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_user_information_register_detail(
             self,
@@ -741,8 +741,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_user_information_unregister_list(
             self,
@@ -802,8 +802,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_user_information_unregister_detail(
             self,
@@ -873,8 +873,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_shopGoods_getAdminShopGoods(
             self,
@@ -934,8 +934,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_shopGoods_getShopGoodsDetail(
             self,
@@ -997,8 +997,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_shopGoods_getGoodsStoreEdits(
             self,
@@ -1060,8 +1060,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_shopGoods_saveGoodsStoreEdits(
             self,
@@ -1118,8 +1118,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_storeProduct_getAdminStoreProductList(
             self,
@@ -1179,8 +1179,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_storeProduct_getStoreProductInfo(
             self,
@@ -1242,8 +1242,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_businessOrderShu_list(
             self,
@@ -1304,8 +1304,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_businessOrderShu_view(
             self,
@@ -1373,8 +1373,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_carParkApplication_carParkCard_list(
             self,
@@ -1434,8 +1434,8 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
 
     def manage_carParkApplication_carParkCard(
             self,
@@ -1497,5 +1497,5 @@ class AdminApi(object):
         if response.status_code == 200:
             json_addict = Dict(response.json())
             if int(response.json().get("status", -1)) == 100:
-                return True, response.status_code, json_addict.data
-        return False, response.status_code, response.text
+                return True, response, json_addict.data
+        return False, response, response.json()
