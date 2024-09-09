@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setup(
     name="guolei-py3-wisharetec",
-    version="1.0.12",
+    version="1.0.14",
     description="慧享科技 API",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,7 +15,7 @@ setup(
     author="guolei",
     author_email="174000902@qq.com",
     license="MIT",
-    keywors=["慧享科技", "绿城","wisharetec"],
+    keywors=["慧享科技", "绿城", "wisharetec"],
     packages=setuptools.find_packages('./'),
     install_requires=[
         "guolei-py3-requests",
