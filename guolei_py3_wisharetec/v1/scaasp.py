@@ -184,6 +184,8 @@ class AdminApi(object):
         if isinstance(requests_request_func_response_callable, Callable):
             return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
         if response.status_code == 200:
+            if len(response.json().keys()):
+                return False, response, response.json()
             return "null" in response.text.strip(), response, response.text
         return False, response, response.json()
 
@@ -259,10 +261,10 @@ class AdminApi(object):
                 f"{self.username}",
             ])
             self.token_data = self.diskcache_instance.get(key=cache_key, default={})
-            request_response_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
-            if not request_response_state:
-                request_response_state, _, _ = self.manage_login(**mange_login_func_kwargs)
-                if request_response_state:
+            response_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
+            if not response_state:
+                response_state, _, _ = self.manage_login(**mange_login_func_kwargs)
+                if response_state:
                     self.diskcache_instance.set(key=cache_key, value=self.token_data, expire=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
@@ -288,10 +290,10 @@ class AdminApi(object):
             if isinstance(self.redis_instance.get(name=cache_key), str) and len(
                     self.redis_instance.get(name=cache_key)):
                 self.token_data = json.loads(self.redis_instance.get(name=cache_key))
-                request_response_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
-                if not request_response_state:
-                    request_response_state, _, _ = self.manage_login(**mange_login_func_kwargs)
-                    if request_response_state:
+                response_state, _, _ = self.check_manage_login(**check_manage_login_func_kwargs)
+                if not response_state:
+                    response_state, _, _ = self.manage_login(**mange_login_func_kwargs)
+                    if response_state:
                         self.redis_instance.setex(name=cache_key, value=self.token_data, time=expire_time)
         else:
             self.manage_login(**mange_login_func_kwargs)
@@ -1489,6 +1491,67 @@ class AdminApi(object):
             **{
                 "id": id,
             },
+            **requests_request_func_kwargs.params,
+        })
+        response = requests.request(**requests_request_func_kwargs.to_dict())
+        if isinstance(requests_request_func_response_callable, Callable):
+            return requests_request_func_response_callable(response, requests_request_func_kwargs.to_dict())
+        if response.status_code == 200:
+            json_addict = Dict(response.json())
+            if int(response.json().get("status", -1)) == 100:
+                return True, response, json_addict.data
+        return False, response, response.json()
+
+    def manage_carParkApplication_carParkCard_parkingCardManagerByAudit(
+            self,
+            requests_request_func_kwargs_params: dict = {},
+            requests_request_func_kwargs_url_path: str = "/manage/carParkApplication/carParkCard/parkingCardManagerByAudit",
+            requests_request_func_kwargs: dict = {},
+            requests_request_func_response_callable: Callable = None
+    ):
+        """
+        智慧物联 > 车场管理 > 停车管理 > 停车授权审核
+        :param requests_request_func_kwargs_params:
+        :param requests_request_func_kwargs_url_path:
+        :param requests_request_func_kwargs:
+        :param requests_request_func_response_callable:
+        :return:
+        """
+        if not isinstance(self.base_url, str):
+            raise TypeError("self.base_url must be a string")
+        if not len(self.base_url):
+            raise ValueError("self.base_url must be a string and not empty")
+        if not isinstance(self.username, str):
+            raise TypeError("self.username must be a string")
+        if not len(self.username):
+            raise ValueError("self.username must be a string and not empty")
+        if not isinstance(self.password, str):
+            raise TypeError("self.password must be a string")
+        if not len(self.password):
+            raise ValueError("self.password must be a string and not empty")
+        if not isinstance(requests_request_func_kwargs_url_path, str):
+            raise TypeError("requests_request_func_kwargs_url_path must be a string")
+        if not len(requests_request_func_kwargs_url_path):
+            raise ValueError("requests_request_func_kwargs_url_path must be a string and not empty")
+        self.token_data = Dict(self.token_data).to_dict()
+        self.token_data.setdefault("token", "")
+        self.token_data.setdefault("companyCode", "")
+        requests_request_func_kwargs_params = Dict(requests_request_func_kwargs_params)
+        requests_request_func_kwargs_params.setdefault("curPage", 1)
+        requests_request_func_kwargs_params.setdefault("pageSize", 20)
+        requests_request_func_kwargs_params.setdefault("executeSearch", 1)
+        requests_request_func_kwargs = Dict(requests_request_func_kwargs)
+        requests_request_func_kwargs.setdefault("url", f"{self.base_url}{requests_request_func_kwargs_url_path}")
+        requests_request_func_kwargs.setdefault("method", "GET")
+        requests_request_func_kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", ""),
+            },
+            **requests_request_func_kwargs.headers,
+        })
+        requests_request_func_kwargs.params = Dict({
+            **requests_request_func_kwargs_params,
             **requests_request_func_kwargs.params,
         })
         response = requests.request(**requests_request_func_kwargs.to_dict())
