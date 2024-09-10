@@ -299,6 +299,23 @@ class AdminApi(object):
             self.manage_login(**mange_login_func_kwargs)
         return self
 
+    def manage_login_with_cache(
+            self,
+            types: str = "diskcache",
+            cache_func_kwargs: dict = {},
+    ):
+        if not isinstance(types, str):
+            types = "diskcache"
+        if not len(types):
+            types = "diskcache"
+        if types.lower() not in ["diskcache", "redis"]:
+            types = "diskcache"
+        if types.lower() == "diskcache":
+            return self.manage_login_with_diskcache(**cache_func_kwargs)
+        if types.lower() == "redis":
+            return self.manage_login_with_redis(**cache_func_kwargs)
+        return self
+
     def manage_communityInfo_getAdminCommunityList(
             self,
             requests_request_func_kwargs_params: dict = {},
