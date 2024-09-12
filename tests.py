@@ -3,17 +3,15 @@ import unittest
 
 from diskcache import Cache
 
-from guolei_py3_wisharetec.scaasp_v1 import AdminApi as GuoleiPy3WisharetecScaaspV1AdminApi, \
-    RequestsResponseCallable as GuoleiPy3WisharetecScaaspV1AdminApiRequestsResponseCallable
-
-diskcache_default_instance = Cache(
+diskcache_cache_default_instance = Cache(
     directory=os.path.join(os.path.dirname(__file__), "runtime", "cache", "diskcache", "default"),
 )
+
+from guolei_py3_wisharetec.v1_1.scaasp.admin.api import Api as WisharetecScaaspAdminApi
 
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
-
         self.assertTrue(True, "Test Failed")  # add assertion here
 
 
