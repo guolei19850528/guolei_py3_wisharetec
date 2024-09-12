@@ -7,7 +7,7 @@ diskcache_cache_default_instance = Cache(
     directory=os.path.join(os.path.dirname(__file__), "runtime", "cache", "diskcache", "default"),
 )
 
-from guolei_py3_wisharetec.v1_1.scaasp.admin.api import Api as WisharetecScaaspAdminApi
+from guolei_py3_wisharetec.v1.scaasp.admin.api import Api as WisharetecScaaspAdminApi
 
 
 class MyTestCase(unittest.TestCase):
