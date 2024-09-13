@@ -111,7 +111,7 @@ class Api(object):
         :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
         :return:
         """
-        if not isinstance(request_func_kwargs, dict):
+        if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(request_func_kwargs, dict)):
             request_func_kwargs = {}
         request_func_kwargs = Dict(request_func_kwargs)
         request_func_kwargs.setdefault("url", f"{self.base_url}/old/serverUserAction!checkSession.action")
@@ -122,11 +122,10 @@ class Api(object):
         })
         response = requests.request(**request_func_kwargs.to_dict())
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
-                instance=isinstance(request_func_response_callable, Callable)):
+                isinstance(request_func_response_callable, Callable)):
             return request_func_response_callable(response, request_func_kwargs)
         if response.status_code == 200:
-            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
-                    isinstance(response.json(), dict)):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(response.json(), dict)):
                 return "null" in response.text.lower().strip()
         return False
 
@@ -153,7 +152,7 @@ class Api(object):
         })
         response = requests.request(**request_func_kwargs.to_dict())
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
-                instance=isinstance(request_func_response_callable, Callable)):
+                isinstance(request_func_response_callable, Callable)):
             return request_func_response_callable(response, request_func_kwargs)
         if response.status_code == 200:
             if Draft202012Validator({
@@ -332,8 +331,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/communityInfo/getCommunityInfo")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -418,8 +415,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/communityRoom/getFullRoomInfo")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -504,8 +499,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/user/register/detail")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -590,8 +583,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/user/information/register/detail")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -676,8 +667,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/user/information/unregister/detail")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -805,8 +794,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/shopGoods/getShopGoodsDetail")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -892,8 +879,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/shopGoods/getGoodsStoreEdits")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -1019,8 +1004,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/storeProduct/getStoreProductInfo")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -1186,8 +1169,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/businessOrderShu/view")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -1272,8 +1253,6 @@ class Api(object):
         request_func_kwargs.setdefault("url", f"{self.base_url}/manage/carParkApplication/carParkCard")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
@@ -1401,8 +1380,6 @@ class Api(object):
                                        f"{self.base_url}/manage/carParkApplication/getParkingCheckList")
         request_func_kwargs.setdefault("method", f"GET")
         request_func_kwargs.setdefault("params", {})
-        request_func_kwargs.params.setdefault("curPage", 1)
-        request_func_kwargs.params.setdefault("pageSize", 20)
         request_func_kwargs.setdefault("headers", {})
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
