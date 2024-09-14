@@ -937,12 +937,12 @@ class Api(object):
                             {"type": "string", "const": "100"},
                         ],
                     },
-                    "data": {"type": "object"}
+                    "data": {"type": "null"}
                 },
                 "required": ["status", "data"]
             }).is_valid(response.json()):
-                return Dict(response.json()).data
-        return Dict()
+                return True
+        return False
 
     def query_store_product_list(
             self,
