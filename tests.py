@@ -14,8 +14,6 @@ class MyTestCase(unittest.TestCase):
     def test_something(self):
         wisharetec_scaasp_admin_api = WisharetecScaaspAdminApi(
             base_url="https://sq.wisharetec.com/",
-            username="test_1",
-            password="guolei_123",
             diskcache_cache=diskcache_cache_default
         )
         business_order_export_id=wisharetec_scaasp_admin_api.login_with_cache().business_order_export(types=1,request_func_kwargs={
