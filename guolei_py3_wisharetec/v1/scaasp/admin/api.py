@@ -179,10 +179,10 @@ class Api(object):
 
     def login_with_diskcache_cache(
             self,
-            diskcache_cache_key: str = None,
-            diskcache_cache_expire: float = None,
+            key: str = None,
+            expire: float = None,
             is_login_func_kwargs: dict = {},
-            login_func_kwargs: dict = {},
+            login_func_kwargs: dict = {}
     ):
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
                 isinstance(self.diskcache_cache, diskcache.Cache)):
@@ -194,29 +194,30 @@ class Api(object):
                 login_func_kwargs = {}
             is_login_func_kwargs = Dict(is_login_func_kwargs)
             login_func_kwargs = Dict(login_func_kwargs)
-            if not Draft202012Validator({"type": "string", "minLength": 1}).is_valid(diskcache_cache_key):
-                diskcache_cache_key = "_".join([
+            if not Draft202012Validator({"type": "string", "minLength": 1}).is_valid(key):
+                key = "_".join([
                     "guolei_py3_wisharetec_v1_scaasp_admin_api_diskcache_cache",
                     "token",
-                    hashlib.md5(self.base_url.encode("utf-8")).hexdigest(),
-                    hashlib.md5(self.username.encode("utf-8")).hexdigest(),
+                    hashlib.md5(
+                        f"{self.base_url}_{self.username}".encode("utf-8")
+                    ).hexdigest(),
                 ])
-            self.token_data = Dict(self.diskcache_cache.get(key=diskcache_cache_key, default={}))
+            self.token_data = Dict(self.diskcache_cache.get(key=key, default={}))
         if not self.is_login(**is_login_func_kwargs):
             if self.login(**login_func_kwargs):
                 self.diskcache_cache.set(
-                    key=diskcache_cache_key,
+                    key=key,
                     value=self.token_data.to_dict(),
-                    expire=diskcache_cache_expire
+                    expire=expire
                 )
         return self
 
     def login_with_redis_cache(
             self,
-            redis_cache_key: str = None,
-            redis_cache_expire: float = None,
+            key: str = None,
+            expire: float = None,
             is_login_func_kwargs: dict = {},
-            login_func_kwargs: dict = {},
+            login_func_kwargs: dict = {}
     ):
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
                 isinstance(self.redis_cache, (redis.Redis, redis.StrictRedis))):
@@ -228,55 +229,56 @@ class Api(object):
                 login_func_kwargs = {}
             is_login_func_kwargs = Dict(is_login_func_kwargs)
             login_func_kwargs = Dict(login_func_kwargs)
-            if not Draft202012Validator({"type": "string", "minLength": 1}).is_valid(redis_cache_key):
-                diskcache_cache_key = "_".join([
+            if not Draft202012Validator({"type": "string", "minLength": 1}).is_valid(key):
+                key = "_".join([
                     "guolei_py3_wisharetec_v1_scaasp_admin_api_redis_cache",
                     "token",
-                    hashlib.md5(self.base_url.encode("utf-8")).hexdigest(),
-                    hashlib.md5(self.username.encode("utf-8")).hexdigest(),
+                    hashlib.md5(
+                        f"{self.base_url}_{self.username}".encode("utf-8")
+                    ).hexdigest(),
                 ])
-            if isinstance(self.redis_cache.get(key=redis_cache_key), str):
-                self.token_data = Dict(json.loads(self.redis_cache.get(key=redis_cache_key)))
+            if isinstance(self.redis_cache.get(key=key), str):
+                self.token_data = Dict(json.loads(self.redis_cache.get(key=key)))
             else:
                 self.token_data = Dict()
         if not self.is_login(**is_login_func_kwargs):
             if self.login(**login_func_kwargs):
-                self.diskcache_cache.set(
-                    key=diskcache_cache_key,
-                    value=self.token_data.to_dict(),
-                    expire=redis_cache_expire
+                self.redis_cache.setex(
+                    name=key,
+                    value=json.dumps(self.token_data.to_dict()),
+                    time=expire
                 )
         return self
 
     def login_with_cache(
             self,
-            cache_type: str = None,
-            cache_key: str = None,
-            cache_expire: float = None,
+            types: str = None,
+            key: str = None,
+            expire: float = None,
             is_login_func_kwargs: dict = {},
-            login_func_kwargs: dict = {},
+            login_func_kwargs: dict = {}
     ):
-        if not Draft202012Validator({"type": "string", "minLength": 1}).is_valid(cache_type):
-            cache_type = "diskcache_cache"
-        if cache_type.lower() not in ["diskcache_cache", "redis_cache"]:
-            cache_type = "diskcache_cache"
-        if cache_type.lower() == "diskcache_cache":
+        if not Draft202012Validator({"type": "string", "minLength": 1}).is_valid(types):
+            types = "diskcache_cache"
+        if types.lower() not in ["diskcache_cache", "redis_cache"]:
+            types = "diskcache_cache"
+        if types.lower() == "diskcache_cache":
             return self.login_with_diskcache_cache(
-                diskcache_cache_key=cache_key,
-                diskcache_cache_expire=cache_expire,
+                key=key,
+                expire=expire,
                 is_login_func_kwargs=is_login_func_kwargs,
                 login_func_kwargs=login_func_kwargs
             )
-        if cache_type.lower() == "redis_cache":
+        if types.lower() == "redis_cache":
             return self.login_with_redis_cache(
-                redis_cache_key=cache_key,
-                redis_cache_expire=cache_expire,
+                key=key,
+                expire=expire,
                 is_login_func_kwargs=is_login_func_kwargs,
                 login_func_kwargs=login_func_kwargs
             )
         raise ValueError("Cache type must be 'diskcache_cache' or 'redis_cache'")
 
-    def query_community_list(
+    def query_community_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -360,7 +362,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_room_no_list(
+    def query_room_no_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -444,7 +446,77 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_register_user_list(
+    def room_no_export(
+            self,
+            login_with_cache_func_kwargs: dict = {},
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None,
+            retry_func_kwargs: dict = {}
+    ):
+        """
+        业户中心 > 房号管理 > 有效房号 > 导出
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :param login_with_cache_func_kwargs:
+        :param retry_func_kwargs: @retry(**retry_func_kwargs)
+        :return:
+        """
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
+            retry_func_kwargs = {}
+        retry_func_kwargs = Dict(retry_func_kwargs)
+        retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
+
+        @retry(**retry_func_kwargs)
+        def _retry_func(
+                login_with_cache_func_kwargs: dict = {},
+                request_func_kwargs: dict = {},
+                request_func_response_callable: Callable = None
+        ):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_kwargs, dict)):
+                request_func_kwargs = {}
+            request_func_kwargs = Dict(request_func_kwargs)
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            self.login_with_cache(**login_with_cache_func_kwargs)
+            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/communityRoom/exportDelayCommunityRoomList")
+            request_func_kwargs.setdefault("method", f"GET")
+            request_func_kwargs.setdefault("params", Dict())
+            request_func_kwargs.setdefault("headers", Dict())
+            request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+            request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+            response = requests.request(**request_func_kwargs.to_dict())
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_response_callable, Callable)):
+                return request_func_response_callable(response, request_func_kwargs)
+            if response.status_code == 200:
+                if Draft202012Validator({
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "oneOf": [
+                                {"type": "integer", "const": 100},
+                                {"type": "string", "const": "100"},
+                            ],
+                        },
+                        "data": {"type": "integer", "minimum": 1},
+                    },
+                    "required": ["status", "data"]
+                }).is_valid(response.json()):
+                    return Dict(response.json()).data
+                raise RetryError("business_order_export error")
+            return 0
+
+        return _retry_func(
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs,
+            request_func_kwargs=request_func_kwargs,
+            request_func_response_callable=request_func_response_callable
+        )
+
+    def query_register_user_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -528,7 +600,77 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_register_owner_list(
+    def register_user_export(
+            self,
+            login_with_cache_func_kwargs: dict = {},
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None,
+            retry_func_kwargs: dict = {}
+    ):
+        """
+        业户中心 > 用户管理 > 注册用户管理 > 导出
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :param login_with_cache_func_kwargs:
+        :param retry_func_kwargs: @retry(**retry_func_kwargs)
+        :return:
+        """
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
+            retry_func_kwargs = {}
+        retry_func_kwargs = Dict(retry_func_kwargs)
+        retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
+
+        @retry(**retry_func_kwargs)
+        def _retry_func(
+                login_with_cache_func_kwargs: dict = {},
+                request_func_kwargs: dict = {},
+                request_func_response_callable: Callable = None
+        ):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_kwargs, dict)):
+                request_func_kwargs = {}
+            request_func_kwargs = Dict(request_func_kwargs)
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            self.login_with_cache(**login_with_cache_func_kwargs)
+            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/user/register/list/export")
+            request_func_kwargs.setdefault("method", f"GET")
+            request_func_kwargs.setdefault("params", Dict())
+            request_func_kwargs.setdefault("headers", Dict())
+            request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+            request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+            response = requests.request(**request_func_kwargs.to_dict())
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_response_callable, Callable)):
+                return request_func_response_callable(response, request_func_kwargs)
+            if response.status_code == 200:
+                if Draft202012Validator({
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "oneOf": [
+                                {"type": "integer", "const": 100},
+                                {"type": "string", "const": "100"},
+                            ],
+                        },
+                        "data": {"type": "integer", "minimum": 1},
+                    },
+                    "required": ["status", "data"]
+                }).is_valid(response.json()):
+                    return Dict(response.json()).data
+                raise RetryError("business_order_export error")
+            return 0
+
+        return _retry_func(
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs,
+            request_func_kwargs=request_func_kwargs,
+            request_func_response_callable=request_func_response_callable
+        )
+
+    def query_register_owner_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -612,7 +754,77 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_unregister_owner_list(
+    def register_owner_export(
+            self,
+            login_with_cache_func_kwargs: dict = {},
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None,
+            retry_func_kwargs: dict = {}
+    ):
+        """
+        业户中心 > 用户管理 > 注册业主管理 > 导出
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :param login_with_cache_func_kwargs:
+        :param retry_func_kwargs: @retry(**retry_func_kwargs)
+        :return:
+        """
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
+            retry_func_kwargs = {}
+        retry_func_kwargs = Dict(retry_func_kwargs)
+        retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
+
+        @retry(**retry_func_kwargs)
+        def _retry_func(
+                login_with_cache_func_kwargs: dict = {},
+                request_func_kwargs: dict = {},
+                request_func_response_callable: Callable = None
+        ):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_kwargs, dict)):
+                request_func_kwargs = {}
+            request_func_kwargs = Dict(request_func_kwargs)
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            self.login_with_cache(**login_with_cache_func_kwargs)
+            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/user/information/register/list/export")
+            request_func_kwargs.setdefault("method", f"GET")
+            request_func_kwargs.setdefault("params", Dict())
+            request_func_kwargs.setdefault("headers", Dict())
+            request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+            request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+            response = requests.request(**request_func_kwargs.to_dict())
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_response_callable, Callable)):
+                return request_func_response_callable(response, request_func_kwargs)
+            if response.status_code == 200:
+                if Draft202012Validator({
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "oneOf": [
+                                {"type": "integer", "const": 100},
+                                {"type": "string", "const": "100"},
+                            ],
+                        },
+                        "data": {"type": "integer", "minimum": 1},
+                    },
+                    "required": ["status", "data"]
+                }).is_valid(response.json()):
+                    return Dict(response.json()).data
+                raise RetryError("business_order_export error")
+            return 0
+
+        return _retry_func(
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs,
+            request_func_kwargs=request_func_kwargs,
+            request_func_response_callable=request_func_response_callable
+        )
+
+    def query_unregister_owner_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -696,7 +908,77 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_shop_goods_category_list(
+    def unregister_owner_export(
+            self,
+            login_with_cache_func_kwargs: dict = {},
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None,
+            retry_func_kwargs: dict = {}
+    ):
+        """
+        业户中心 > 用户管理 > 未注册业主管理 > 导出
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :param login_with_cache_func_kwargs:
+        :param retry_func_kwargs: @retry(**retry_func_kwargs)
+        :return:
+        """
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
+            retry_func_kwargs = {}
+        retry_func_kwargs = Dict(retry_func_kwargs)
+        retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
+
+        @retry(**retry_func_kwargs)
+        def _retry_func(
+                login_with_cache_func_kwargs: dict = {},
+                request_func_kwargs: dict = {},
+                request_func_response_callable: Callable = None
+        ):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_kwargs, dict)):
+                request_func_kwargs = {}
+            request_func_kwargs = Dict(request_func_kwargs)
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            self.login_with_cache(**login_with_cache_func_kwargs)
+            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/user/information/unregister/list/export")
+            request_func_kwargs.setdefault("method", f"GET")
+            request_func_kwargs.setdefault("params", Dict())
+            request_func_kwargs.setdefault("headers", Dict())
+            request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+            request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+            response = requests.request(**request_func_kwargs.to_dict())
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_response_callable, Callable)):
+                return request_func_response_callable(response, request_func_kwargs)
+            if response.status_code == 200:
+                if Draft202012Validator({
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "oneOf": [
+                                {"type": "integer", "const": 100},
+                                {"type": "string", "const": "100"},
+                            ],
+                        },
+                        "data": {"type": "integer", "minimum": 1},
+                    },
+                    "required": ["status", "data"]
+                }).is_valid(response.json()):
+                    return Dict(response.json()).data
+                raise RetryError("business_order_export error")
+            return 0
+
+        return _retry_func(
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs,
+            request_func_kwargs=request_func_kwargs,
+            request_func_response_callable=request_func_response_callable
+        )
+
+    def query_shop_goods_category_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -739,7 +1021,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_shop_goods_list(
+    def query_shop_goods_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -949,7 +1231,7 @@ class Api(object):
                 return True
         return False
 
-    def query_store_product_list(
+    def query_store_product_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -1114,7 +1396,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_business_order_list(
+    def query_business_order_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -1201,10 +1483,10 @@ class Api(object):
     def business_order_export(
             self,
             types: int = 1,
+            login_with_cache_func_kwargs: dict = {},
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None,
-            retry_func_kwargs: dict = {},
-            login_with_cache_func_kwargs: dict = {},
+            retry_func_kwargs: dict = {}
     ):
         """
         生活服务 > 订单管理 > 商业订单 > 导出
@@ -1215,26 +1497,7 @@ class Api(object):
         :param retry_func_kwargs: @retry(**retry_func_kwargs)
         :return:
         """
-        if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(request_func_kwargs, dict)):
-            request_func_kwargs = {}
-        request_func_kwargs = Dict(request_func_kwargs)
-        if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
-                isinstance(login_with_cache_func_kwargs, dict)):
-            login_with_cache_func_kwargs = {}
-        login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
-        self.login_with_cache(**login_with_cache_func_kwargs)
-        if types == 1:
-            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/businessOrder/exportToExcelByOrder")
-        if types == 2:
-            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/businessOrder/exportToExcelByProduct")
-        if types == 3:
-            request_func_kwargs.setdefault("url",
-                                           f"{self.base_url}/manage/businessOrder/exportToExcelByOrderAndProduct")
-        request_func_kwargs.setdefault("method", f"GET")
-        request_func_kwargs.setdefault("params", Dict())
-        request_func_kwargs.setdefault("headers", Dict())
-        request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
-        request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
             retry_func_kwargs = {}
         retry_func_kwargs = Dict(retry_func_kwargs)
@@ -1242,7 +1505,33 @@ class Api(object):
         retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
 
         @retry(**retry_func_kwargs)
-        def _retry_func():
+        def _retry_func(
+                types: int = 1,
+                login_with_cache_func_kwargs: dict = {},
+                request_func_kwargs: dict = {},
+                request_func_response_callable: Callable = None
+        ):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_kwargs, dict)):
+                request_func_kwargs = {}
+            request_func_kwargs = Dict(request_func_kwargs)
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            self.login_with_cache(**login_with_cache_func_kwargs)
+            if types == 1:
+                request_func_kwargs.setdefault("url", f"{self.base_url}/manage/businessOrder/exportToExcelByOrder")
+            if types == 2:
+                request_func_kwargs.setdefault("url", f"{self.base_url}/manage/businessOrder/exportToExcelByProduct")
+            if types == 3:
+                request_func_kwargs.setdefault("url",
+                                               f"{self.base_url}/manage/businessOrder/exportToExcelByOrderAndProduct")
+            request_func_kwargs.setdefault("method", f"GET")
+            request_func_kwargs.setdefault("params", Dict())
+            request_func_kwargs.setdefault("headers", Dict())
+            request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+            request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
             response = requests.request(**request_func_kwargs.to_dict())
             if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
                     isinstance(request_func_response_callable, Callable)):
@@ -1265,9 +1554,168 @@ class Api(object):
                 raise RetryError("business_order_export error")
             return 0
 
-        return _retry_func()
+        return _retry_func(
+            types=types,
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs,
+            request_func_kwargs=request_func_kwargs,
+            request_func_response_callable=request_func_response_callable
+        )
 
-    def query_parking_auth_list(
+    def query_work_order_with_paginator(
+            self,
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None
+    ):
+        """
+        物业管理 > 服务工单
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :return:
+        """
+        if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(request_func_kwargs, dict)):
+            request_func_kwargs = {}
+        request_func_kwargs = Dict(request_func_kwargs)
+        request_func_kwargs.setdefault("url", f"{self.base_url}/old/orderAction!viewList.action")
+        request_func_kwargs.setdefault("method", f"GET")
+        request_func_kwargs.setdefault("params", Dict())
+        request_func_kwargs.params.setdefault("curPage", 1)
+        request_func_kwargs.params.setdefault("pageSize", 20)
+        request_func_kwargs.setdefault("headers", Dict())
+        request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+        request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        response = requests.request(**request_func_kwargs.to_dict())
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                isinstance(request_func_response_callable, Callable)):
+            return request_func_response_callable(response, request_func_kwargs)
+        if response.status_code == 200:
+            if Draft202012Validator({
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "oneOf": [
+                            {"type": "integer", "const": 100},
+                            {"type": "string", "const": "100"},
+                        ],
+                    },
+                    "data": {"type": "object"}
+                },
+                "required": ["status", "data"]
+            }).is_valid(response.json()):
+                return Dict(response.json()).data
+        return Dict()
+
+    def query_work_order_detail(
+            self,
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None
+    ):
+        """
+        物业管理 > 服务工单 > 工单详情
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :return:
+        """
+        if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(request_func_kwargs, dict)):
+            request_func_kwargs = {}
+        request_func_kwargs = Dict(request_func_kwargs)
+        request_func_kwargs.setdefault("url", f"{self.base_url}/old/orderAction!view.action")
+        request_func_kwargs.setdefault("method", f"GET")
+        request_func_kwargs.setdefault("params", Dict())
+        request_func_kwargs.setdefault("headers", Dict())
+        request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+        request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        response = requests.request(**request_func_kwargs.to_dict())
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                isinstance(request_func_response_callable, Callable)):
+            return request_func_response_callable(response, request_func_kwargs)
+        if response.status_code == 200:
+            if Draft202012Validator({
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "oneOf": [
+                            {"type": "integer", "const": 100},
+                            {"type": "string", "const": "100"},
+                        ],
+                    },
+                    "data": {"type": "object"}
+                },
+                "required": ["status", "data"]
+            }).is_valid(response.json()):
+                return Dict(response.json()).data
+        return Dict()
+
+    def work_order_export(
+            self,
+            login_with_cache_func_kwargs: dict = {},
+            request_func_kwargs: dict = {},
+            request_func_response_callable: Callable = None,
+            retry_func_kwargs: dict = {}
+    ):
+        """
+        物业管理 > 服务工单 > 导出
+        :param request_func_kwargs: requests.request(**request_func_kwargs)
+        :param request_func_response_callable: request_func_response_callable(response,request_func_kwargs)
+        :param login_with_cache_func_kwargs:
+        :param retry_func_kwargs: @retry(**retry_func_kwargs)
+        :return:
+        """
+        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
+            retry_func_kwargs = {}
+        retry_func_kwargs = Dict(retry_func_kwargs)
+        retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
+
+        @retry(**retry_func_kwargs)
+        def _retry_func(
+                login_with_cache_func_kwargs: dict = {},
+                request_func_kwargs: dict = {},
+                request_func_response_callable: Callable = None
+        ):
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_kwargs, dict)):
+                request_func_kwargs = {}
+            request_func_kwargs = Dict(request_func_kwargs)
+            if not Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            self.login_with_cache(**login_with_cache_func_kwargs)
+            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/order/work/export")
+            request_func_kwargs.setdefault("method", f"GET")
+            request_func_kwargs.setdefault("params", Dict())
+            request_func_kwargs.setdefault("headers", Dict())
+            request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
+            request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+            response = requests.request(**request_func_kwargs.to_dict())
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(request_func_response_callable, Callable)):
+                return request_func_response_callable(response, request_func_kwargs)
+            if response.status_code == 200:
+                if Draft202012Validator({
+                    "type": "object",
+                    "properties": {
+                        "status": {
+                            "oneOf": [
+                                {"type": "integer", "const": 100},
+                                {"type": "string", "const": "100"},
+                            ],
+                        },
+                        "data": {"type": "integer", "minimum": 1},
+                    },
+                    "required": ["status", "data"]
+                }).is_valid(response.json()):
+                    return Dict(response.json()).data
+                raise RetryError("business_order_export error")
+            return 0
+
+        return _retry_func(
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs,
+            request_func_kwargs=request_func_kwargs,
+            request_func_response_callable=request_func_response_callable
+        )
+
+    def query_parking_auth_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -1392,7 +1840,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_parking_auth_audit_list(
+    def query_parking_auth_audit_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -1436,7 +1884,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_parking_auth_audit_check_list(
+    def query_parking_auth_audit_check_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -1520,7 +1968,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def query_export_list(
+    def query_export_with_paginator(
             self,
             request_func_kwargs: dict = {},
             request_func_response_callable: Callable = None
@@ -1570,7 +2018,7 @@ class Api(object):
             self,
             export_id: Union[str, int] = 0,
             download_file_path: str = "",
-            query_export_list_func_kwargs: dict = {},
+            query_export_with_paginator_func_kwargs: dict = {},
             login_with_cache_func_kwargs: dict = {},
             retry_func_kwargs: dict = {}
     ):
@@ -1578,7 +2026,7 @@ class Api(object):
         下载导出文件
         :param export_id: 导出ID
         :param download_file_path: 下载文件地址
-        :param query_export_list_func_kwargs: query_export_list(**query_export_list_func_kwargs)
+        :param query_export_with_paginator_func_kwargs: query_export_with_paginator(**query_export_with_paginator_func_kwargs)
         :param login_with_cache_func_kwargs: login_with_cache(**login_with_cache_func_kwargs)
         :param retry_func_kwargs: @retry(**retry_func_kwargs)
         :return:
@@ -1586,14 +2034,6 @@ class Api(object):
         validate(instance=export_id, schema={"type": "integer", "minimum": 1})
         validate(instance=download_file_path, schema={"type": "string", "minLength": 1})
         os.makedirs(os.path.dirname(download_file_path), exist_ok=True)
-        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
-                isinstance(query_export_list_func_kwargs, dict)):
-            query_export_list_func_kwargs = {}
-        query_export_list_func_kwargs = Dict(query_export_list_func_kwargs)
-        if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
-                isinstance(login_with_cache_func_kwargs, dict)):
-            login_with_cache_func_kwargs = {}
-        login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(isinstance(retry_func_kwargs, dict)):
             retry_func_kwargs = {}
         retry_func_kwargs = Dict(retry_func_kwargs)
@@ -1601,15 +2041,28 @@ class Api(object):
         retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
 
         @retry(**retry_func_kwargs)
-        def _retry_func(download_file_path: str = None):
-            query_export_list = self.login_with_cache(**login_with_cache_func_kwargs.to_dict()).query_export_list(
-                **query_export_list_func_kwargs.to_dict())
+        def _retry_func(
+                download_file_path: str = None,
+                query_export_with_paginator_func_kwargs: dict = {},
+                login_with_cache_func_kwargs: dict = {},
+        ):
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(query_export_with_paginator_func_kwargs, dict)):
+                query_export_with_paginator_func_kwargs = {}
+            query_export_with_paginator_func_kwargs = Dict(query_export_with_paginator_func_kwargs)
+            if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
+                    isinstance(login_with_cache_func_kwargs, dict)):
+                login_with_cache_func_kwargs = {}
+            login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs)
+            export_with_paginator = self.login_with_cache(
+                **login_with_cache_func_kwargs.to_dict()).query_export_with_paginator(
+                **query_export_with_paginator_func_kwargs.to_dict())
             if Draft202012Validator({
                 "type": "object",
                 "properties": {"resultList": {"type": "array", "minItems": 1}},
                 "required": ["resultList"]
-            }).is_valid(query_export_list):
-                for i in query_export_list.resultList:
+            }).is_valid(export_with_paginator):
+                for i in export_with_paginator.resultList:
                     if Draft202012Validator({
                         "type": "object",
                         "properties": {
@@ -1627,4 +2080,8 @@ class Api(object):
                         return download_file_path
                     raise RetryError("download export file error")
 
-        return _retry_func(download_file_path=download_file_path)
+        return _retry_func(
+            download_file_path=download_file_path,
+            query_export_with_paginator_func_kwargs=query_export_with_paginator_func_kwargs,
+            login_with_cache_func_kwargs=login_with_cache_func_kwargs
+        )
