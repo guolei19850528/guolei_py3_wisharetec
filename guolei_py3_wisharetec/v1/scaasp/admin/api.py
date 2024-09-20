@@ -21,8 +21,7 @@ import diskcache
 import redis
 import requests
 from addict import Dict
-from jsonschema import validate
-from jsonschema.validators import Draft202012Validator
+from jsonschema.validators import validate, Draft202012Validator
 from retrying import retry, RetryError
 
 
@@ -1125,9 +1124,9 @@ class Api(object):
         request_func_kwargs.setdefault("headers", Dict())
         request_func_kwargs.headers.setdefault("Token", self.token_data.get("token", ""))
         request_func_kwargs.headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
-        if Draft202012Validator({"type": "str", "minLebgth": 1}).is_valid(request_func_kwargs.id):
-            request_func_kwargs.setdefault("url", f"{self.base_url}/manage/shopGoods/updateShopGoods")
-            request_func_kwargs.setdefault("method", f"PUT")
+        if Draft202012Validator({"type": "string", "minLength": 1}).is_valid(request_func_kwargs.json.id):
+            request_func_kwargs.url = f"{self.base_url}/manage/shopGoods/updateShopGoods"
+            request_func_kwargs.method = f"PUT"
         response = requests.request(**request_func_kwargs.to_dict())
         if Draft202012Validator({"type": "boolean", "const": True}).is_valid(
                 isinstance(request_func_response_callable, Callable)):
@@ -1142,12 +1141,11 @@ class Api(object):
                             {"type": "string", "const": "100"},
                         ],
                     },
-                    "data": {"type": "object"}
                 },
-                "required": ["status", "data"]
+                "required": ["status"]
             }).is_valid(response.json()):
-                return Dict(response.json()).data
-        return Dict()
+                return True
+        return False
 
     def query_shop_goods_push_to_store(
             self,
@@ -1224,9 +1222,8 @@ class Api(object):
                             {"type": "string", "const": "100"},
                         ],
                     },
-                    "data": {"type": "null"}
                 },
-                "required": ["status", "data"]
+                "required": ["status"]
             }).is_valid(response.json()):
                 return True
         return False
