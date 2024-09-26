@@ -17,7 +17,7 @@ import diskcache
 import redis
 import requests
 from addict import Dict
-from jsonschema.validators import Draft202012Validator
+from jsonschema.validators import Draft202012Validator, validate
 from requests import Response
 from retrying import retry, RetryError
 
@@ -27,47 +27,47 @@ api_urls_addict = Dict()
 api_urls_addict.is_login = "/old/serverUserAction!checkSession.action"
 # 登录
 api_urls_addict.login = "/manage/login"
-
-api_urls_addict.query_community_with_paginator = "/manage/communityInfo/getAdminCommunityList"
+# 业户中心 > 项目管理
+api_urls_addict.query_community_by_paginator = "/manage/communityInfo/getAdminCommunityList"
 api_urls_addict.query_community_detail = "/manage/communityInfo/getCommunityInfo"
-api_urls_addict.query_room_no_with_paginator = "/manage/communityRoom/listCommunityRoo"
+api_urls_addict.query_room_no_by_paginator = "/manage/communityRoom/listCommunityRoo"
 api_urls_addict.query_room_no_detail = "/manage/communityRoom/getFullRoomInfo"
 api_urls_addict.room_no_export = "/manage/communityRoom/exportDelayCommunityRoomList"
-api_urls_addict.query_register_user_with_paginator = "/manage/user/register/list"
+api_urls_addict.query_register_user_by_paginator = "/manage/user/register/list"
 api_urls_addict.query_register_user_detail = "/manage/user/register/detail"
 api_urls_addict.register_user_export = "/manage/user/register/list/export"
-api_urls_addict.query_register_owner_with_paginator = "/manage/user/information/register/list"
+api_urls_addict.query_register_owner_by_paginator = "/manage/user/information/register/list"
 api_urls_addict.query_register_owner_detail = "/manage/user/information/register/detail"
 api_urls_addict.register_owner_export = "/manage/user/information/register/list/export"
-api_urls_addict.query_unregister_owner_with_paginator = "/manage/user/information/unregister/list"
+api_urls_addict.query_unregister_owner_by_paginator = "/manage/user/information/unregister/list"
 api_urls_addict.query_unregister_owner_detail = "/manage/user/information/unregister/detail"
 api_urls_addict.unregister_owner_export = "/manage/user/information/unregister/list/export"
-api_urls_addict.query_shop_goods_category_with_paginator = "/manage/productCategory/getProductCategoryList"
-api_urls_addict.query_shop_goods_with_paginator = "/manage/shopGoods/getAdminShopGoods"
+api_urls_addict.query_shop_goods_category_by_paginator = "/manage/productCategory/getProductCategoryList"
+api_urls_addict.query_shop_goods_by_paginator = "/manage/shopGoods/getAdminShopGoods"
 api_urls_addict.query_shop_goods_detail = "/manage/shopGoods/getShopGoodsDetail"
 api_urls_addict.add_shop_goods = "/manage/shopGoods/saveSysShopGoods"
 api_urls_addict.update_shop_goods = "/manage/shopGoods/updateShopGoods"
 api_urls_addict.query_shop_goods_push_to_store = "/manage/shopGoods/getGoodsStoreEdits"
 api_urls_addict.save_shop_goods_push_to_store = "/manage/shopGoods/saveGoodsStoreEdits"
-api_urls_addict.query_store_product_with_paginator = "/manage/storeProduct/getAdminStoreProductList"
+api_urls_addict.query_store_product_by_paginator = "/manage/storeProduct/getAdminStoreProductList"
 api_urls_addict.query_store_product_detail = "/manage/storeProduct/getStoreProductInfo"
 api_urls_addict.update_store_product = "/manage/storeProduct/updateStoreProductInfo"
 api_urls_addict.update_store_product_status = "/manage/storeProduct/updateProductStatus"
-api_urls_addict.query_business_order_with_paginator = "/manage/businessOrderShu/list"
+api_urls_addict.query_business_order_by_paginator = "/manage/businessOrderShu/list"
 api_urls_addict.query_business_order_detail = "/manage/businessOrderShu/view"
 api_urls_addict.business_order_export_1 = "/manage/businessOrder/exportToExcelByOrder"
 api_urls_addict.business_order_export_1 = "/manage/businessOrder/exportToExcelByProduct"
 api_urls_addict.business_order_export_1 = "/manage/businessOrder/exportToExcelByOrderAndProduct"
-api_urls_addict.query_work_order_with_paginator = "/old/orderAction!viewList.action"
+api_urls_addict.query_work_order_by_paginator = "/old/orderAction!viewList.action"
 api_urls_addict.query_work_order_detail = "/old/orderAction!view.action"
 api_urls_addict.work_order_export = "/manage/order/work/export"
-api_urls_addict.query_parking_auth_with_paginator = "/manage/carParkApplication/carParkCard/list"
+api_urls_addict.query_parking_auth_by_paginator = "/manage/carParkApplication/carParkCard/list"
 api_urls_addict.query_parking_auth_detail = "/manage/carParkApplication/carParkCard"
 api_urls_addict.update_parking_auth = "/manage/carParkApplication/carParkCard"
-api_urls_addict.query_parking_auth_audit_with_paginator = "/manage/carParkApplication/carParkCard/parkingCardManagerByAudit"
-api_urls_addict.query_parking_auth_audit_check_with_paginator = "/manage/carParkApplication/getParkingCheckList"
+api_urls_addict.query_parking_auth_audit_by_paginator = "/manage/carParkApplication/carParkCard/parkingCardManagerByAudit"
+api_urls_addict.query_parking_auth_audit_check_by_paginator = "/manage/carParkApplication/getParkingCheckList"
 api_urls_addict.update_parking_auth_audit_status = "/manage/carParkApplication/completeTask"
-api_urls_addict.query_export_with_paginator = "/manage/export/log"
+api_urls_addict.query_export_by_paginator = "/manage/export/log"
 
 
 class Api(object):
@@ -151,9 +151,22 @@ class Api(object):
         :param request_func_response_callable: return request_func_response_callable(response,request_func_kwargs) if isinstance(request_func_response_callable, Callable)
         :return:
         """
+        validate(instance=self.username, schema={"type": "string", "minLength": 1, })
+        validate(instance=self.password, schema={"type": "string", "minLength": 1, })
         request_func_kwargs = Dict(request_func_kwargs) if isinstance(request_func_kwargs, dict) else Dict()
         request_func_kwargs.setdefault("url", f"{self.base_url}{request_func_kwargs_url_path}")
-        request_func_kwargs.setdefault("method", f"GET")
+        request_func_kwargs.setdefault("method", "GET")
+        validate(
+            instance=request_func_kwargs,
+            schema={
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string", "minLength": 1, "format": "uri"},
+                    "method": {"type": "string", "minLength": 1},
+                },
+                "required": ["url", "method"],
+            }
+        )
         response = requests.request(**request_func_kwargs.to_dict())
         if isinstance(request_func_response_callable, Callable):
             return request_func_response_callable(response, request_func_kwargs)
@@ -173,7 +186,7 @@ class Api(object):
                 return Dict(response.json()).data
         return Dict()
 
-    def request_with_token(
+    def request_by_token(
             self,
             request_func_kwargs_url_path: str = None,
             request_func_kwargs: dict = None,
@@ -185,8 +198,8 @@ class Api(object):
         usage:
             >>> from guolei_py3_wisharetec.v1.scaasp.admin.api import Api as AdminApi
             >>> admin_api=AdminApi()
-            >>> admin_api.login().request_with_token()
-            >>> admin_api.login_with_diskcache().request_with_token()
+            >>> admin_api.login().request_by_token()
+            >>> admin_api.login_by_diskcache().request_by_token()
         :param request_func_kwargs_url_path: request_func_kwargs.url=f"{self.base_url}{request_func_kwargs_url_path}"
         :param request_func_kwargs: requests.request(**request_func_kwargs)
         :param request_func_response_callable: return request_func_response_callable(response,request_func_kwargs) if isinstance(request_func_response_callable, Callable)
@@ -223,7 +236,7 @@ class Api(object):
         """
         if not isinstance(request_func_response_callable, Callable):
             request_func_response_callable = lambda x, y: x.text.lower().startswith("null")
-        return self.request_with_token(
+        return self.request_by_token(
             request_func_kwargs_url_path=request_func_kwargs_url_path,
             request_func_kwargs=request_func_kwargs,
             request_func_response_callable=request_func_response_callable
@@ -283,7 +296,7 @@ class Api(object):
                 self.token_data = Dict(response.json()).data
         return self
 
-    def login_with_diskcache(
+    def login_by_diskcache(
             self,
             key: str = None,
             expire: float = None,
@@ -309,7 +322,7 @@ class Api(object):
                 self.diskcache_instance.set(key=key, value=self.token_data, expire=expire)
         return self
 
-    def login_with_redis(
+    def login_by_redis(
             self,
             key: str = None,
             expire: Union[int, timedelta] = None,
@@ -337,85 +350,108 @@ class Api(object):
 
         return self
 
-    def login_with_cache(
+    def login_by_cache(
             self,
-            types: str = "diskcache",
-            login_with_cache_func_kwargs: dict = None,
+            name: str = "diskcache",
+            login_by_cache_func_kwargs: dict = None,
     ):
         """
         使用缓存登录
-        :param types: 类型 diskcache || redis
-        :param login_with_cache_func_kwargs: self.login_with_redis(**login_with_cache_func_kwargs) || self.login_with_diskcache(**login_with_cache_func_kwargs)
+        :param name: diskcache || redis
+        :param login_by_cache_func_kwargs: self.login_by_redis(**login_by_cache_func_kwargs) || self.login_by_diskcache(**login_by_cache_func_kwargs)
         :return:
         """
-        login_with_cache_func_kwargs = Dict(login_with_cache_func_kwargs) if login_with_cache_func_kwargs else Dict()
-        if types.lower() == "redis":
-            return self.login_with_redis(
-                **login_with_cache_func_kwargs
+        login_by_cache_func_kwargs = Dict(login_by_cache_func_kwargs) if login_by_cache_func_kwargs else Dict()
+        if name.lower() == "redis":
+            return self.login_by_redis(
+                **login_by_cache_func_kwargs
             )
-        return self.login_with_diskcache(
-            **login_with_cache_func_kwargs
+        return self.login_by_diskcache(
+            **login_by_cache_func_kwargs
         )
 
-    def download_export_with_id(
+    def exec_export(
+            self,
+            request_func_kwargs_url_path: str = None,
+            request_func_kwargs: dict = None,
+            request_func_response_callable: Callable = None,
+            login_by_cache_func_kwargs: dict = None,
+            retry_func_kwargs: dict = None
+    ):
+        request_func_kwargs = Dict(request_func_kwargs) if request_func_kwargs else Dict()
+        login_by_cache_func_kwargs = Dict(login_by_cache_func_kwargs) if login_by_cache_func_kwargs else Dict()
+        retry_func_kwargs = Dict(retry_func_kwargs) if retry_func_kwargs else Dict()
+        retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=1).seconds * 1000)
+
+        @retry(**retry_func_kwargs)
+        def _retry_func():
+            export_id = self.login_by_cache(**login_by_cache_func_kwargs).request_by_token(
+                request_func_kwargs_url_path=request_func_kwargs_url_path,
+                request_func_kwargs=request_func_kwargs,
+                request_func_response_callable=request_func_response_callable,
+            )
+            validate(export_id, {"type": "integer", "minimum": 1})
+            return export_id
+
+        return _retry_func()
+
+    def download_export(
             self,
             export_id: Union[str, int] = 0,
-            download_path: str = None,
-            query_export_with_paginator_func_kwargs: dict = None,
-            login_with_cache_func_kwargs: dict = None,
+            download_export_path: str = None,
+            query_export_by_paginator_func_kwargs: dict = None,
+            login_by_cache_func_kwargs: dict = None,
             retry_func_kwargs: dict = None
     ):
         """
-        使用 ID 下载导出
+        使用导出ID下载导出文件
         :param export_id: 导出ID
-        :param download_path: 下载路径
-        :param query_export_with_paginator_func_kwargs: 分页查询导出数据参数
-        :param login_with_cache_func_kwargs: 缓存登录参数
+        :param download_export_path: 下载导出路径
+        :param query_export_by_paginator_func_kwargs: 分页查询导出数据参数
+        :param login_by_cache_func_kwargs: 缓存登录参数
         :param retry_func_kwargs: 重试参数
         :return:
         """
-        login_with_cache_func_kwargs = Dict(
-            login_with_cache_func_kwargs) if login_with_cache_func_kwargs else Dict()
-        query_export_with_paginator_func_kwargs = Dict(
-            query_export_with_paginator_func_kwargs) if query_export_with_paginator_func_kwargs else Dict()
-        query_export_with_paginator_func_kwargs.setdefault(
+        login_by_cache_func_kwargs = Dict(
+            login_by_cache_func_kwargs) if login_by_cache_func_kwargs else Dict()
+        query_export_by_paginator_func_kwargs = Dict(
+            query_export_by_paginator_func_kwargs) if query_export_by_paginator_func_kwargs else Dict()
+        query_export_by_paginator_func_kwargs.setdefault(
             "request_func_kwargs_url_path",
-            api_urls_addict.query_export_with_paginator
+            api_urls_addict.query_export_by_paginator
         )
-        query_export_with_paginator_func_kwargs.setdefault("request_func_kwargs", Dict())
-        query_export_with_paginator_func_kwargs.request_func_kwargs.setdefault("method", "GET")
-        query_export_with_paginator_func_kwargs.request_func_kwargs.setdefault("verify", False)
-        query_export_with_paginator_func_kwargs.request_func_kwargs.setdefault("timeout", (60, 60))
-        query_export_with_paginator_func_kwargs.request_func_kwargs.params = Dict({
+        query_export_by_paginator_func_kwargs.setdefault("request_func_kwargs", Dict())
+        query_export_by_paginator_func_kwargs.request_func_kwargs.setdefault("method", "GET")
+        query_export_by_paginator_func_kwargs.request_func_kwargs.setdefault("verify", False)
+        query_export_by_paginator_func_kwargs.request_func_kwargs.setdefault("timeout", (60, 60))
+        query_export_by_paginator_func_kwargs.request_func_kwargs.params = Dict({
             **{
                 "executeSearch": 1,
                 "curPage": 1,
                 "pageSize": 50,
+                "userType": 102,
+                "myExport": 0,
             },
-            **query_export_with_paginator_func_kwargs.request_func_kwargs.params,
+            **query_export_by_paginator_func_kwargs.request_func_kwargs.params,
         })
         retry_func_kwargs = Dict(retry_func_kwargs) if retry_func_kwargs else Dict()
         retry_func_kwargs.setdefault("stop_max_attempt_number", timedelta(minutes=60).seconds)
-        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=10).seconds * 1000)
+        retry_func_kwargs.setdefault("wait_fixed", timedelta(seconds=1).seconds * 1000)
 
         @retry(**retry_func_kwargs)
-        def _retry_func(
-                export_id: Union[str, int] = 0,
-                download_path: str = None,
-                query_export_with_paginator_func_kwargs: dict = None,
-                login_with_cache_func_kwargs: dict = None,
-        ):
-            export_with_paginator = self.login_with_cache(
-                **login_with_cache_func_kwargs
-            ).request_with_token(
-                **query_export_with_paginator_func_kwargs
+        def _retry_func(download_export_path: str = ""):
+            export_by_paginator = self.login_by_cache(
+                **login_by_cache_func_kwargs
+            ).request_by_token(
+                **query_export_by_paginator_func_kwargs
             )
             if Draft202012Validator({
                 "type": "object",
                 "properties": {"resultList": {"type": "array", "minItems": 1}},
                 "required": ["resultList"]
-            }).is_valid(export_with_paginator):
-                for i in export_with_paginator.resultList:
+            }).is_valid(export_by_paginator):
+                for i in export_by_paginator.resultList:
                     if Draft202012Validator({
                         "type": "object",
                         "properties": {
@@ -425,18 +461,13 @@ class Api(object):
                         }
                     }).is_valid(i):
                         if "".join(pathlib.Path(i.filePath).suffixes).lower() not in "".join(
-                                pathlib.Path(download_path).suffixes).lower():
-                            download_path = f"{download_path}{''.join(pathlib.Path(i.filePath).suffixes)}"
+                                pathlib.Path(download_export_path).suffixes).lower():
+                            download_export_path = f"{download_export_path}{''.join(pathlib.Path(i.filePath).suffixes)}"
                         response = requests.get(i.filePath)
-                        with open(download_path, "wb") as f:
+                        with open(download_export_path, "wb") as f:
                             f.write(response.content)
-                        return download_path
-                    raise RetryError("download_export_with_id func error")
-            raise RetryError("download_export_with_id func error")
+                        return download_export_path
+                    raise RetryError("download_expor func error")
+            raise RetryError("download_expor func error")
 
-        return _retry_func(
-            export_id=export_id,
-            download_path=download_path,
-            query_export_with_paginator_func_kwargs=query_export_with_paginator_func_kwargs,
-            login_with_cache_func_kwargs=login_with_cache_func_kwargs
-        )
+        return _retry_func(download_export_path=download_export_path)
