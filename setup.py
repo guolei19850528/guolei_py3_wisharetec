@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setup(
     name="guolei-py3-wisharetec",
-    version="1.10.10",
+    version="2.0.0",
     description="慧享(绿城)科技 API",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -25,6 +25,6 @@ setup(
         "retrying",
         "jsonschema",
     ],
-    python_requires='>=3.0',
+    python_requires=">=3.0",
     zip_safe=False
 )
