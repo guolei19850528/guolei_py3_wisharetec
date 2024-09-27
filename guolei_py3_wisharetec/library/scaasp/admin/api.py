@@ -19,6 +19,7 @@ import requests
 from addict import Dict
 from jsonschema.validators import Draft202012Validator, validate
 
+
 class ApiUrlSettings:
     """
     Url Settings Class
@@ -296,6 +297,7 @@ class Api(object):
         if isinstance(custom_callable, Callable):
             return custom_callable(response)
         if response.status_code == 200:
+            json_addict = Dict(response.json())
             if Draft202012Validator({
                 "type": "object",
                 "properties": {
@@ -307,8 +309,8 @@ class Api(object):
                     },
                 },
                 "required": ["status", "data"]
-            }).is_valid(response.json()):
-                return Dict(response.json()).data
+            }).is_valid(json_addict):
+                return json_addict.data
         return Dict()
 
     def post(
@@ -345,6 +347,7 @@ class Api(object):
         if isinstance(custom_callable, Callable):
             return custom_callable(response)
         if response.status_code == 200:
+            json_addict = Dict(response.json())
             if Draft202012Validator({
                 "type": "object",
                 "properties": {
@@ -356,8 +359,8 @@ class Api(object):
                     },
                 },
                 "required": ["status", "data"]
-            }).is_valid(response.json()):
-                return Dict(response.json()).data
+            }).is_valid(json_addict):
+                return json_addict.data
         return Dict()
 
     def put(
@@ -394,6 +397,7 @@ class Api(object):
         if isinstance(custom_callable, Callable):
             return custom_callable(response)
         if response.status_code == 200:
+            json_addict = Dict(response.json())
             if Draft202012Validator({
                 "type": "object",
                 "properties": {
@@ -405,25 +409,25 @@ class Api(object):
                     },
                 },
                 "required": ["status", "data"]
-            }).is_valid(response.json()):
-                return Dict(response.json()).data
+            }).is_valid(json_addict):
+                return json_addict.data
         return Dict()
 
     def request(
             self,
             method: str = "GET",
             url: str = "",
-            data: dict = None,
             params: dict = None,
+            data: dict = None,
             kwargs: dict = None,
             custom_callable: Callable = None
     ):
         """
         use requests.request
-        :param method:
+        :param method: requests.request(method=method,url=url,data=data,params=params,**kwargs)
         :param url: requests.request(method=method,url=url,data=data,params=params,**kwargs) url=base_url+url if not pattern ^http else url
-        :param data: requests.request(method=method,url=url,data=data,params=params,**kwargs)
         :param params: requests.request(method=method,url=url,data=data,params=params,**kwargs)
+        :param data: requests.request(method=method,url=url,data=data,params=params,**kwargs)
         :param kwargs: requests.request(method=method,url=url,data=data,params=params,**kwargs)
         :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
         :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
@@ -449,6 +453,7 @@ class Api(object):
         if isinstance(custom_callable, Callable):
             return custom_callable(response)
         if response.status_code == 200:
+            json_addict = Dict(response.json())
             if Draft202012Validator({
                 "type": "object",
                 "properties": {
@@ -460,6 +465,6 @@ class Api(object):
                     },
                 },
                 "required": ["status", "data"]
-            }).is_valid(response.json()):
-                return Dict(response.json()).data
+            }).is_valid(json_addict):
+                return json_addict.data
         return Dict()
