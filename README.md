@@ -6,16 +6,19 @@
 
 ```python
 import diskcache
-from guolei_py3_wisharetec.library.scaasp.admin.api import Api as AdminApi, ApiUrlSettings as AdminApiUrlSettings
+from guolei_py3_wisharetec.library.scaasp.admin.api import (
+    Api as ScaaspAdminApi,
+    ApiUrlSettings as ScaaspAdminApiUrlSettings
+)
 
-admin_api = AdminApi(
+sccaasp_admin_api = ScaaspAdminApi(
     base_url="<BASE_URL>",
     username="<USERNAME>",
     password="<PASSWORD>",
     cache_instance=diskcache.Cache()
 )
 
-result = admin_api.login().get(
+result = sccaasp_admin_api.login().get(
     url="<URL>",
     params={},
     kwargs={},
