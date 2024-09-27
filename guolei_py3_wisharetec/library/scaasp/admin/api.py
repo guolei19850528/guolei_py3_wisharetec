@@ -183,7 +183,7 @@ class Api(object):
         """
         登录
         :param custom_callable: 自定义回调 custom_callable(self) if isinstance(custom_callable, Callable)
-        :return: custom_callable(self) if isinstance(custom_callable, Callable) else addict.Dict instance
+        :return: custom_callable(self) if isinstance(custom_callable, Callable) else self
         """
         if isinstance(custom_callable, Callable):
             return custom_callable(self)
@@ -191,7 +191,7 @@ class Api(object):
         validate(instance=self.username, schema={"type": "string", "minLength": 1})
         validate(instance=self.password, schema={"type": "string", "minLength": 1})
         # 缓存key
-        cache_key = f"guolei_py3_wisharetec_token_data__{self._username}"
+        cache_key = f"guolei_py3_wisharetec_token_data__{self.username}"
         # 使用缓存
         if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
             if isinstance(self.cache_instance, diskcache.Cache):
@@ -223,6 +223,7 @@ class Api(object):
             timeout=(60, 60)
         )
         if response.status_code == 200:
+            json_addict=Dict(response.json())
             if Draft202012Validator({
                 "type": "object",
                 "properties": {
@@ -242,8 +243,8 @@ class Api(object):
                     }
                 },
                 "required": ["status", "data"]
-            }).is_valid(response.json()):
-                self.token_data = Dict(response.json()).data
+            }).is_valid(json_addict):
+                self.token_data = json_addict.data
                 # 缓存处理
                 if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
                     if isinstance(self.cache_instance, diskcache.Cache):
@@ -316,15 +317,17 @@ class Api(object):
     def post(
             self,
             url: str = "",
+            params: dict = None,
             data: dict = None,
             kwargs: dict = None,
             custom_callable: Callable = None
     ):
         """
         use requests.post
-        :param url: requests.post(url=url,data=data,**kwargs) url=base_url+url if not pattern ^http else url
-        :param data: requests.post(url=url,data=data,**kwargs)
-        :param kwargs: requests.post(url=url,data=data,**kwargs)
+        :param url: requests.post(url=url,params=params,data=data,**kwargs) url=base_url+url if not pattern ^http else url
+        :param params: requests.post(url=url,params=params,data=data,**kwargs)
+        :param data: requests.post(url=url,params=params,data=data,**kwargs)
+        :param kwargs: requests.post(url=url,params=params,data=data,**kwargs)
         :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
         :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
         """
@@ -341,6 +344,7 @@ class Api(object):
         })
         response = requests.post(
             url=url,
+            params=params,
             data=data,
             **kwargs.to_dict()
         )
@@ -367,14 +371,16 @@ class Api(object):
             self,
             url: str = "",
             data: dict = None,
+            params: dict = None,
             kwargs: dict = None,
             custom_callable: Callable = None
     ):
         """
         use requests.put
-        :param url: requests.put(url=url,params=params,**kwargs) url=base_url+url if not pattern ^http else url
-        :param data: requests.put(url=url,data=data,**kwargs)
-        :param kwargs: requests.put(url=url,data=data,**kwargs)
+        :param url: requests.put(url=url,params=params,data=data,**kwargs) url=base_url+url if not pattern ^http else url
+        :param params: requests.put(url=url,params=params,data=data,**kwargs)
+        :param data: requests.put(url=url,params=params,data=data,**kwargs)
+        :param kwargs: requests.put(url=url,params=params,data=data,**kwargs)
         :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
         :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
         """
@@ -389,8 +395,9 @@ class Api(object):
             },
             **kwargs.headers
         })
-        response = requests.put(
+        response = requests.post(
             url=url,
+            params=params,
             data=data,
             **kwargs.to_dict()
         )
@@ -424,11 +431,11 @@ class Api(object):
     ):
         """
         use requests.request
-        :param method: requests.request(method=method,url=url,data=data,params=params,**kwargs)
-        :param url: requests.request(method=method,url=url,data=data,params=params,**kwargs) url=base_url+url if not pattern ^http else url
-        :param params: requests.request(method=method,url=url,data=data,params=params,**kwargs)
-        :param data: requests.request(method=method,url=url,data=data,params=params,**kwargs)
-        :param kwargs: requests.request(method=method,url=url,data=data,params=params,**kwargs)
+        :param method: requests.request(method=method,url=url,params=params,data=data,**kwargs)
+        :param url: requests.request(method=method,url=url,params=params,data=data,**kwargs) url=base_url+url if not pattern ^http else url
+        :param params: requests.request(method=method,url=url,params=params,data=data,**kwargs)
+        :param data: requests.request(method=method,url=url,params=params,data=data,**kwargs)
+        :param kwargs: requests.request(method=method,url=url,params=params,data=data,**kwargs)
         :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
         :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
         """
