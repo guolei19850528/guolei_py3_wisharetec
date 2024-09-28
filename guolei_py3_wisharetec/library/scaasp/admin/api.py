@@ -27,6 +27,10 @@ from requests import Response
 
 
 class ResponseCallable(ResponseCallable):
+    """
+    Response Callable Class
+    """
+
     @staticmethod
     def text__start_with_null(response: Response = None, status_code: int = 200):
         text = ResponseCallable.text(response=response, status_code=status_code)
@@ -296,7 +300,6 @@ class Api(object):
             headers: Any = None,
             **kwargs: Any
     ):
-        headers = self.headers(headers=headers, is_with_token=is_with_token)
         return self.request(
             is_with_token=is_with_token,
             response_callable=response_callable,
@@ -317,7 +320,6 @@ class Api(object):
             headers: Any = None,
             **kwargs: Any
     ):
-        headers = self.headers(headers=headers, is_with_token=is_with_token)
         return self.request(
             is_with_token=is_with_token,
             response_callable=response_callable,
@@ -339,7 +341,6 @@ class Api(object):
             headers: Any = None,
             **kwargs: Any
     ):
-        headers = self.headers(headers=headers, is_with_token=is_with_token)
         return self.request(
             is_with_token=is_with_token,
             response_callable=response_callable,
