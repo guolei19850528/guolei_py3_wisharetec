@@ -11,7 +11,7 @@ github:[https://github.com/guolei19850528/guolei_py3_wisharetec]
 import hashlib
 import pathlib
 from datetime import timedelta
-from typing import Union, Callable, Iterator
+from typing import Union, Callable, Iterator, Any
 
 import diskcache
 import redis
@@ -19,54 +19,85 @@ import requests
 from addict import Dict
 from jsonschema.validators import Draft202012Validator, validate
 
+from guolei_py3_requests.library import (
+    request,
+    ResponseCallable
+)
+from requests import Response
 
-class ApiUrlSettings:
+
+class ResponseCallable(ResponseCallable):
+    @staticmethod
+    def text__start_with_null(response: Response = None, status_code: int = 200):
+        text = ResponseCallable.text(response=response, status_code=status_code)
+        return isinstance(text, str) and text.startswith("null")
+
+    @staticmethod
+    def json_addict__status_100__data(response: Response = None, status_code: int = 200):
+        json_addict = ResponseCallable.json_addict(response=response, status_code=status_code)
+        if Draft202012Validator({
+            "type": "object",
+            "properties": {
+                "status": {
+                    "oneOf": [
+                        {"type": "integer", "const": 100},
+                        {"type": "string", "const": "100"},
+                    ],
+                },
+            },
+            "required": ["status", "data"]
+        }):
+            return json_addict.data
+        return Dict()
+
+
+class UrlsSetting:
     """
-    Url Settings Class
+    Urls Settings Class
     """
 
-    URL__QUERY_LOGIN_STATE: str = "/old/serverUserAction!checkSession.action"
-    URL__LOGIN: str = "/manage/login"
-    URL__QUERY_COMMUNITY_BY_PAGINATOR: str = "/manage/communityInfo/getAdminCommunityList"
-    URL__QUERY_COMMUNITY_DETAIL: str = "/manage/communityInfo/getCommunityInfo"
-    URL__QUERY_ROOM_BY_PAGINATOR: str = "/manage/communityRoom/listCommunityRoom"
-    URL__QUERY_ROOM_DETAIL: str = "/manage/communityRoom/getFullRoomInfo"
-    URL__QUERY_ROOM_EXPORT: str = "/manage/communityRoom/exportDelayCommunityRoomList"
-    URL__QUERY_REGISTER_USER_BY_PAGINATOR: str = "/manage/user/register/list"
-    URL__QUERY_REGISTER_USER_DETAIL: str = "/manage/user/register/detail"
-    URL__QUERY_REGISTER_USER_EXPORT: str = "/manage/user/register/list/export"
-    URL__QUERY_REGISTER_OWNER_BY_PAGINATOR: str = "/manage/user/information/register/list"
-    URL__QUERY_REGISTER_OWNER_DETAIL: str = "/manage/user/information/register/detail"
-    URL__QUERY_REGISTER_OWNER_EXPORT: str = "/manage/user/information/register/list/export"
-    URL__QUERY_UNREGISTER_OWNER_BY_PAGINATOR: str = "/manage/user/information/unregister/list"
-    URL__QUERY_UNREGISTER_OWNER_DETAIL: str = "/manage/user/information/unregister/detail"
-    URL__QUERY_UNREGISTER_OWNER_EXPORT: str = "/manage/user/information/unregister/list/export"
-    URL__QUERY_SHOP_GOODS_CATEGORY_BY_PAGINATOR: str = "/manage/productCategory/getProductCategoryList"
-    URL__QUERY_SHOP_GOODS_BY_PAGINATOR: str = "/manage/shopGoods/getAdminShopGoods"
-    URL__QUERY_SHOP_GOODS_DETAIL: str = "/manage/shopGoods/getShopGoodsDetail"
-    URL__SAVE_SHOP_GOODS: str = "/manage/shopGoods/saveSysShopGoods"
-    URL__UPDATE_SHOP_GOODS: str = "/manage/shopGoods/updateShopGoods"
-    URL__QUERY_SHOP_GOODS_PUSH_TO_STORE: str = "/manage/shopGoods/getGoodsStoreEdits"
-    URL__SAVE_SHOP_GOODS_PUSH_TO_STORE: str = "/manage/shopGoods/saveGoodsStoreEdits"
-    URL__QUERY_STORE_PRODUCT_BY_PAGINATOR: str = "/manage/storeProduct/getAdminStoreProductList"
-    URL__QUERY_STORE_PRODUCT_DETAIL: str = "/manage/storeProduct/getStoreProductInfo"
-    URL__UPDATE_STORE_PRODUCT: str = "/manage/storeProduct/updateStoreProductInfo"
-    URL__UPDATE_STORE_PRODUCT_STATUS: str = "/manage/storeProduct/updateProductStatus"
-    URL__QUERY_BUSINESS_ORDER_BY_PAGINATOR: str = "/manage/businessOrderShu/list"
-    URL__QUERY_BUSINESS_ORDER_DETAIL: str = "/manage/businessOrderShu/view"
-    URL__QUERY_BUSINESS_ORDER_EXPORT_1: str = "/manage/businessOrder/exportToExcelByOrder"
-    URL__QUERY_BUSINESS_ORDER_EXPORT_2: str = "/manage/businessOrder/exportToExcelByProduct"
-    URL__QUERY_BUSINESS_ORDER_EXPORT_3: str = "/manage/businessOrder/exportToExcelByOrderAndProduct"
-    URL__QUERY_WORK_ORDER_BY_PAGINATOR: str = "/old/orderAction!viewList.action"
-    URL__QUERY_WORK_ORDER_DETAIL: str = "/old/orderAction!view.action"
-    URL__QUERY_WORK_ORDER_EXPORT: str = "/manage/order/work/export"
-    URL__QUERY_PARKING_AUTH_BY_PAGINATOR: str = "/manage/carParkApplication/carParkCard/list"
-    URL__QUERY_PARKING_AUTH_DETAIL: str = "/manage/carParkApplication/carParkCard"
-    URL__UPDATE_PARKING_AUTH: str = "/manage/carParkApplication/carParkCard"
-    URL__QUERY_PARKING_AUTH_AUDIT_BY_PAGINATOR: str = "/manage/carParkApplication/carParkCard/parkingCardManagerByAudit"
-    URL__QUERY_PARKING_AUTH_AUDIT_CHECK_BY_PAGINATOR: str = "/manage/carParkApplication/getParkingCheckList"
-    URL__UPDATE_PARKING_AUTH_AUDIT_STATUS: str = "/manage/carParkApplication/completeTask"
-    URL__QUERY_EXPORT_BY_PAGINATOR: str = "/manage/export/log"
+    QUERY_LOGIN_STATE: str = "/old/serverUserAction!checkSession.action"
+    LOGIN: str = "/manage/login"
+    QUERY_COMMUNITY_BY_PAGINATOR: str = "/manage/communityInfo/getAdminCommunityList"
+    QUERY_COMMUNITY_DETAIL: str = "/manage/communityInfo/getCommunityInfo"
+    QUERY_ROOM_BY_PAGINATOR: str = "/manage/communityRoom/listCommunityRoom"
+    QUERY_ROOM_DETAIL: str = "/manage/communityRoom/getFullRoomInfo"
+    QUERY_ROOM_EXPORT: str = "/manage/communityRoom/exportDelayCommunityRoomList"
+    QUERY_REGISTER_USER_BY_PAGINATOR: str = "/manage/user/register/list"
+    QUERY_REGISTER_USER_DETAIL: str = "/manage/user/register/detail"
+    QUERY_REGISTER_USER_EXPORT: str = "/manage/user/register/list/export"
+    QUERY_REGISTER_OWNER_BY_PAGINATOR: str = "/manage/user/information/register/list"
+    QUERY_REGISTER_OWNER_DETAIL: str = "/manage/user/information/register/detail"
+    QUERY_REGISTER_OWNER_EXPORT: str = "/manage/user/information/register/list/export"
+    QUERY_UNREGISTER_OWNER_BY_PAGINATOR: str = "/manage/user/information/unregister/list"
+    QUERY_UNREGISTER_OWNER_DETAIL: str = "/manage/user/information/unregister/detail"
+    QUERY_UNREGISTER_OWNER_EXPORT: str = "/manage/user/information/unregister/list/export"
+    QUERY_SHOP_GOODS_CATEGORY_BY_PAGINATOR: str = "/manage/productCategory/getProductCategoryList"
+    QUERY_SHOP_GOODS_BY_PAGINATOR: str = "/manage/shopGoods/getAdminShopGoods"
+    QUERY_SHOP_GOODS_DETAIL: str = "/manage/shopGoods/getShopGoodsDetail"
+    SAVE_SHOP_GOODS: str = "/manage/shopGoods/saveSysShopGoods"
+    UPDATE_SHOP_GOODS: str = "/manage/shopGoods/updateShopGoods"
+    QUERY_SHOP_GOODS_PUSH_TO_STORE: str = "/manage/shopGoods/getGoodsStoreEdits"
+    SAVE_SHOP_GOODS_PUSH_TO_STORE: str = "/manage/shopGoods/saveGoodsStoreEdits"
+    QUERY_STORE_PRODUCT_BY_PAGINATOR: str = "/manage/storeProduct/getAdminStoreProductList"
+    QUERY_STORE_PRODUCT_DETAIL: str = "/manage/storeProduct/getStoreProductInfo"
+    UPDATE_STORE_PRODUCT: str = "/manage/storeProduct/updateStoreProductInfo"
+    UPDATE_STORE_PRODUCT_STATUS: str = "/manage/storeProduct/updateProductStatus"
+    QUERY_BUSINESS_ORDER_BY_PAGINATOR: str = "/manage/businessOrderShu/list"
+    QUERY_BUSINESS_ORDER_DETAIL: str = "/manage/businessOrderShu/view"
+    QUERY_BUSINESS_ORDER_EXPORT_1: str = "/manage/businessOrder/exportToExcelByOrder"
+    QUERY_BUSINESS_ORDER_EXPORT_2: str = "/manage/businessOrder/exportToExcelByProduct"
+    QUERY_BUSINESS_ORDER_EXPORT_3: str = "/manage/businessOrder/exportToExcelByOrderAndProduct"
+    QUERY_WORK_ORDER_BY_PAGINATOR: str = "/old/orderAction!viewList.action"
+    QUERY_WORK_ORDER_DETAIL: str = "/old/orderAction!view.action"
+    QUERY_WORK_ORDER_EXPORT: str = "/manage/order/work/export"
+    QUERY_PARKING_AUTH_BY_PAGINATOR: str = "/manage/carParkApplication/carParkCard/list"
+    QUERY_PARKING_AUTH_DETAIL: str = "/manage/carParkApplication/carParkCard"
+    UPDATE_PARKING_AUTH: str = "/manage/carParkApplication/carParkCard"
+    QUERY_PARKING_AUTH_AUDIT_BY_PAGINATOR: str = "/manage/carParkApplication/carParkCard/parkingCardManagerByAudit"
+    QUERY_PARKING_AUTH_AUDIT_CHECK_BY_PAGINATOR: str = "/manage/carParkApplication/getParkingCheckList"
+    UPDATE_PARKING_AUTH_AUDIT_STATUS: str = "/manage/carParkApplication/completeTask"
+    QUERY_EXPORT_BY_PAGINATOR: str = "/manage/export/log"
 
 
 class Api(object):
@@ -179,14 +210,21 @@ class Api(object):
         """
         self._token_data = token_data
 
-    def login(self, custom_callable: Callable = None):
+    def headers(self, headers: dict = None, is_with_token: bool = True):
+        headers = Dict(headers) if headers else Dict()
+        if is_with_token:
+            headers.setdefault("Token", self.token_data.get("token", ""))
+            headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        return headers.to_dict()
+
+    def login(self, login_callable: Callable = None):
         """
         登录
-        :param custom_callable: 自定义回调 custom_callable(self) if isinstance(custom_callable, Callable)
+        :param login_callable: 自定义回调 custom_callable(self) if isinstance(custom_callable, Callable)
         :return: custom_callable(self) if isinstance(custom_callable, Callable) else self
         """
-        if isinstance(custom_callable, Callable):
-            return custom_callable(self)
+        if isinstance(login_callable, Callable):
+            return login_callable(self)
         validate(instance=self.base_url, schema={"type": "string", "minLength": 1, "pattern": "^http"})
         validate(instance=self.username, schema={"type": "string", "minLength": 1})
         validate(instance=self.password, schema={"type": "string", "minLength": 1})
@@ -200,20 +238,19 @@ class Api(object):
                 self.token_data = self.cache_instance.hgetall(cache_key)
 
         # 用户是否登录
-        response = requests.get(
-            url=f"{self.base_url}{ApiUrlSettings.URL__QUERY_LOGIN_STATE}",
-            headers={
-                "Token": self.token_data.get("token", ""),
-                "Companycode": self.token_data.get("companyCode", ""),
-            },
+        login_state = self.get(
+            is_with_token=True,
+            response_callable=ResponseCallable.text__start_with_null,
+            url=f"{UrlsSetting.QUERY_LOGIN_STATE}",
             verify=False,
             timeout=(60, 60)
         )
-        if response.status_code == 200:
-            if response.text.lower().startswith("null"):
-                return self
-        response = requests.post(
-            url=f"{self.base_url}{ApiUrlSettings.URL__LOGIN}",
+        if login_state:
+            return self
+        token_data = self.post(
+            is_with_token=False,
+            response_callable=ResponseCallable.json_addict__status_100__data,
+            url=f"{UrlsSetting.LOGIN}",
             data={
                 "username": self.username,
                 "password": hashlib.md5(self.password.encode("utf-8")).hexdigest(),
@@ -222,256 +259,116 @@ class Api(object):
             verify=False,
             timeout=(60, 60)
         )
-        if response.status_code == 200:
-            json_addict=Dict(response.json())
-            if Draft202012Validator({
-                "type": "object",
-                "properties": {
-                    "status": {
-                        "oneOf": [
-                            {"type": "integer", "const": 100},
-                            {"type": "string", "const": "100"},
-                        ],
-                    },
-                    "data": {
-                        "type": "object",
-                        "properties": {
-                            "token": {"type": "string", "minLength": 1},
-                            "companyCode": {"type": "string", "minLength": 1},
-                        },
-                        "required": ["token", "companyCode"],
-                    }
-                },
-                "required": ["status", "data"]
-            }).is_valid(json_addict):
-                self.token_data = json_addict.data
-                # 缓存处理
-                if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
-                    if isinstance(self.cache_instance, diskcache.Cache):
-                        self.cache_instance.set(
-                            key=cache_key,
-                            value=self.token_data,
-                            expire=timedelta(days=30).total_seconds()
-                        )
-                    if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
-                        self.cache_instance.hset(
-                            name=cache_key,
-                            mapping=self.token_data
-                        )
-                        self.cache_instance.expire(
-                            name=cache_key,
-                            time=timedelta(days=30)
-                        )
+        if Draft202012Validator({
+            "type": "object",
+            "properties": {
+                "token": {"type": "string", "minLength": 1},
+                "companyCode": {"type": "string", "minLength": 1},
+            },
+            "required": ["token", "companyCode"],
+        }).is_valid(token_data):
+            self.token_data = token_data
+            # 缓存处理
+            if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
+                if isinstance(self.cache_instance, diskcache.Cache):
+                    self.cache_instance.set(
+                        key=cache_key,
+                        value=self.token_data,
+                        expire=timedelta(days=30).total_seconds()
+                    )
+                if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
+                    self.cache_instance.hset(
+                        name=cache_key,
+                        mapping=self.token_data
+                    )
+                    self.cache_instance.expire(
+                        name=cache_key,
+                        time=timedelta(days=30)
+                    )
         return self
 
     def get(
             self,
-            url: str = "",
-            params: dict = None,
-            kwargs: dict = None,
-            custom_callable: Callable = None
+            is_with_token=True,
+            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            url: str = None,
+            params: Any = None,
+            headers: Any = None,
+            **kwargs: Any
     ):
-        """
-        use requests.get
-        :param url: requests.get(url=url,params=params,**kwargs) url=base_url+url if not pattern ^http else url
-        :param params: requests.get(url=url,params=params,**kwargs)
-        :param kwargs: requests.get(url=url,params=params,**kwargs)
-        :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
-        :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
-        """
-        if not Draft202012Validator({"type": "string", "minLength": 1, "pattern": "^http"}).is_valid(url):
-            url = f"/{url}" if not url.startswith("/") else url
-            url = f"{self.base_url}{url}"
-        kwargs = Dict(kwargs) if isinstance(kwargs, dict) else Dict()
-        kwargs.headers = Dict({
-            **{
-                "Token": self.token_data.get("token", ""),
-                "Companycode": self.token_data.get("companyCode", ""),
-            },
-            **kwargs.headers
-        })
-        response = requests.get(
-            url=f"{url}",
+        headers = self.headers(headers=headers, is_with_token=is_with_token)
+        return self.request(
+            is_with_token=is_with_token,
+            response_callable=response_callable,
+            method="GET",
+            url=url,
             params=params,
-            **kwargs.to_dict()
+            headers=headers,
+            **kwargs
         )
-        if isinstance(custom_callable, Callable):
-            return custom_callable(response)
-        if response.status_code == 200:
-            json_addict = Dict(response.json())
-            if Draft202012Validator({
-                "type": "object",
-                "properties": {
-                    "status": {
-                        "oneOf": [
-                            {"type": "integer", "const": 100},
-                            {"type": "string", "const": "100"},
-                        ],
-                    },
-                },
-                "required": ["status", "data"]
-            }).is_valid(json_addict):
-                return json_addict.data
-        return Dict()
 
     def post(
             self,
-            url: str = "",
-            params: dict = None,
-            data: dict = None,
-            kwargs: dict = None,
-            custom_callable: Callable = None
+            is_with_token=True,
+            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            url: str = None,
+            params: Any = None,
+            data: Any = None,
+            headers: Any = None,
+            **kwargs: Any
     ):
-        """
-        use requests.post
-        :param url: requests.post(url=url,params=params,data=data,**kwargs) url=base_url+url if not pattern ^http else url
-        :param params: requests.post(url=url,params=params,data=data,**kwargs)
-        :param data: requests.post(url=url,params=params,data=data,**kwargs)
-        :param kwargs: requests.post(url=url,params=params,data=data,**kwargs)
-        :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
-        :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
-        """
-        if not Draft202012Validator({"type": "string", "minLength": 1, "pattern": "^http"}).is_valid(url):
-            url = f"/{url}" if not url.startswith("/") else url
-            url = f"{self.base_url}{url}"
-        kwargs = Dict(kwargs) if isinstance(kwargs, dict) else Dict()
-        kwargs.headers = Dict({
-            **{
-                "Token": self.token_data.get("token", ""),
-                "Companycode": self.token_data.get("companyCode", ""),
-            },
-            **kwargs.headers
-        })
-        response = requests.post(
+        headers = self.headers(headers=headers, is_with_token=is_with_token)
+        return self.request(
+            is_with_token=is_with_token,
+            response_callable=response_callable,
+            method="POST",
             url=url,
             params=params,
             data=data,
-            **kwargs.to_dict()
+            headers=headers,
+            **kwargs
         )
-        if isinstance(custom_callable, Callable):
-            return custom_callable(response)
-        if response.status_code == 200:
-            json_addict = Dict(response.json())
-            if Draft202012Validator({
-                "type": "object",
-                "properties": {
-                    "status": {
-                        "oneOf": [
-                            {"type": "integer", "const": 100},
-                            {"type": "string", "const": "100"},
-                        ],
-                    },
-                },
-                "required": ["status", "data"]
-            }).is_valid(json_addict):
-                return json_addict.data
-        return Dict()
 
     def put(
             self,
-            url: str = "",
-            data: dict = None,
-            params: dict = None,
-            kwargs: dict = None,
-            custom_callable: Callable = None
+            is_with_token=True,
+            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            url: str = None,
+            params: Any = None,
+            data: Any = None,
+            headers: Any = None,
+            **kwargs: Any
     ):
-        """
-        use requests.put
-        :param url: requests.put(url=url,params=params,data=data,**kwargs) url=base_url+url if not pattern ^http else url
-        :param params: requests.put(url=url,params=params,data=data,**kwargs)
-        :param data: requests.put(url=url,params=params,data=data,**kwargs)
-        :param kwargs: requests.put(url=url,params=params,data=data,**kwargs)
-        :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
-        :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
-        """
-        if not Draft202012Validator({"type": "string", "minLength": 1, "pattern": "^http"}).is_valid(url):
-            url = f"/{url}" if not url.startswith("/") else url
-            url = f"{self.base_url}{url}"
-        kwargs = Dict(kwargs) if isinstance(kwargs, dict) else Dict()
-        kwargs.headers = Dict({
-            **{
-                "Token": self.token_data.get("token", ""),
-                "Companycode": self.token_data.get("companyCode", ""),
-            },
-            **kwargs.headers
-        })
-        response = requests.post(
+        headers = self.headers(headers=headers, is_with_token=is_with_token)
+        return self.request(
+            is_with_token=is_with_token,
+            response_callable=response_callable,
+            method="PUT",
             url=url,
             params=params,
             data=data,
-            **kwargs.to_dict()
+            headers=headers,
+            **kwargs
         )
-        if isinstance(custom_callable, Callable):
-            return custom_callable(response)
-        if response.status_code == 200:
-            json_addict = Dict(response.json())
-            if Draft202012Validator({
-                "type": "object",
-                "properties": {
-                    "status": {
-                        "oneOf": [
-                            {"type": "integer", "const": 100},
-                            {"type": "string", "const": "100"},
-                        ],
-                    },
-                },
-                "required": ["status", "data"]
-            }).is_valid(json_addict):
-                return json_addict.data
-        return Dict()
 
     def request(
             self,
+            is_with_token=True,
+            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
             method: str = "GET",
-            url: str = "",
-            params: dict = None,
-            data: dict = None,
-            kwargs: dict = None,
-            custom_callable: Callable = None
+            url: str = None,
+            headers: Any = None,
+            **kwargs
     ):
-        """
-        use requests.request
-        :param method: requests.request(method=method,url=url,params=params,data=data,**kwargs)
-        :param url: requests.request(method=method,url=url,params=params,data=data,**kwargs) url=base_url+url if not pattern ^http else url
-        :param params: requests.request(method=method,url=url,params=params,data=data,**kwargs)
-        :param data: requests.request(method=method,url=url,params=params,data=data,**kwargs)
-        :param kwargs: requests.request(method=method,url=url,params=params,data=data,**kwargs)
-        :param custom_callable: custom_callable(response) if isinstance(custom_callable,Callable)
-        :return:custom_callable(response) if isinstance(custom_callable,Callable) else addict.Dict instance
-        """
         if not Draft202012Validator({"type": "string", "minLength": 1, "pattern": "^http"}).is_valid(url):
             url = f"/{url}" if not url.startswith("/") else url
             url = f"{self.base_url}{url}"
-        kwargs = Dict(kwargs) if isinstance(kwargs, dict) else Dict()
-        kwargs.headers = Dict({
-            **{
-                "Token": self.token_data.get("token", ""),
-                "Companycode": self.token_data.get("companyCode", ""),
-            },
-            **kwargs.headers
-        })
-        response = requests.request(
+        if is_with_token:
+            headers = self.headers(headers=headers, is_with_token=is_with_token)
+        return request(
+            response_callable=response_callable,
             method=method,
             url=url,
-            params=params,
-            data=data,
-            **kwargs.to_dict()
+            headers=headers,
+            **kwargs
         )
-        if isinstance(custom_callable, Callable):
-            return custom_callable(response)
-        if response.status_code == 200:
-            json_addict = Dict(response.json())
-            if Draft202012Validator({
-                "type": "object",
-                "properties": {
-                    "status": {
-                        "oneOf": [
-                            {"type": "integer", "const": 100},
-                            {"type": "string", "const": "100"},
-                        ],
-                    },
-                },
-                "required": ["status", "data"]
-            }).is_valid(json_addict):
-                return json_addict.data
-        return Dict()
