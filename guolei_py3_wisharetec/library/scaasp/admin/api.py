@@ -214,7 +214,7 @@ class Api(object):
         """
         self._token_data = token_data
 
-    def get_headers(self, headers: dict = None, is_with_token: bool = True):
+    def headers(self, headers: dict = None, is_with_token: bool = True):
         headers = Dict(headers) if headers else Dict()
         if is_with_token:
             headers.setdefault("Token", self.token_data.get("token", ""))
@@ -242,17 +242,15 @@ class Api(object):
                 self.token_data = self.cache_instance.hgetall(cache_key)
 
         # 用户是否登录
-        login_state = self.get(
-            is_with_token=True,
+        result = self.get(
             response_callable=ResponseCallable.text__start_with_null,
             url=f"{UrlsSetting.QUERY_LOGIN_STATE}",
             verify=False,
             timeout=(60, 60)
         )
-        if login_state:
+        if result:
             return self
-        token_data = self.post(
-            is_with_token=False,
+        result = self.post(
             response_callable=ResponseCallable.json_addict__status_is_100__data,
             url=f"{UrlsSetting.LOGIN}",
             data={
@@ -270,8 +268,8 @@ class Api(object):
                 "companyCode": {"type": "string", "minLength": 1},
             },
             "required": ["token", "companyCode"],
-        }).is_valid(token_data):
-            self.token_data = token_data
+        }).is_valid(result):
+            self.token_data = result
             # 缓存处理
             if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
                 if isinstance(self.cache_instance, diskcache.Cache):
@@ -301,7 +299,6 @@ class Api(object):
             **kwargs: Any
     ):
         return self.request(
-            is_with_token=is_with_token,
             response_callable=response_callable,
             method="GET",
             url=url,
@@ -312,7 +309,6 @@ class Api(object):
 
     def post(
             self,
-            is_with_token=True,
             response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             url: str = None,
             params: Any = None,
@@ -322,7 +318,6 @@ class Api(object):
             **kwargs: Any
     ):
         return self.request(
-            is_with_token=is_with_token,
             response_callable=response_callable,
             method="POST",
             url=url,
@@ -335,7 +330,6 @@ class Api(object):
 
     def put(
             self,
-            is_with_token=True,
             response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             url: str = None,
             params: Any = None,
@@ -345,7 +339,6 @@ class Api(object):
             **kwargs: Any
     ):
         return self.request(
-            is_with_token=is_with_token,
             response_callable=response_callable,
             method="PUT",
             url=url,
@@ -358,7 +351,6 @@ class Api(object):
 
     def request(
             self,
-            is_with_token=True,
             response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             method: str = "GET",
             url: str = None,
@@ -369,8 +361,7 @@ class Api(object):
         if not Draft202012Validator({"type": "string", "minLength": 1, "pattern": "^http"}).is_valid(url):
             url = f"/{url}" if not url.startswith("/") else url
             url = f"{self.base_url}{url}"
-        if is_with_token:
-            headers = self.get_headers(headers=headers, is_with_token=is_with_token)
+        headers = self.headers(headers=headers)
         return request(
             response_callable=response_callable,
             method=method,
