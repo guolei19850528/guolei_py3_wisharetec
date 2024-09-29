@@ -50,7 +50,7 @@ class ResponseCallable(ResponseCallable):
                 },
             },
             "required": ["status", "data"]
-        }):
+        }).is_valid(json_addict):
             return json_addict.data
         return Dict()
 
@@ -214,7 +214,7 @@ class Api(object):
         """
         self._token_data = token_data
 
-    def headers(self, headers: dict = None, is_with_token: bool = True):
+    def get_headers(self, headers: dict = None, is_with_token: bool = True):
         headers = Dict(headers) if headers else Dict()
         if is_with_token:
             headers.setdefault("Token", self.token_data.get("token", ""))
@@ -317,6 +317,7 @@ class Api(object):
             url: str = None,
             params: Any = None,
             data: Any = None,
+            json: Any = None,
             headers: Any = None,
             **kwargs: Any
     ):
@@ -327,6 +328,7 @@ class Api(object):
             url=url,
             params=params,
             data=data,
+            json=json,
             headers=headers,
             **kwargs
         )
@@ -338,6 +340,7 @@ class Api(object):
             url: str = None,
             params: Any = None,
             data: Any = None,
+            json: Any = None,
             headers: Any = None,
             **kwargs: Any
     ):
@@ -348,6 +351,7 @@ class Api(object):
             url=url,
             params=params,
             data=data,
+            json=json,
             headers=headers,
             **kwargs
         )
@@ -358,6 +362,7 @@ class Api(object):
             response_callable: Callable = ResponseCallable.json_addict__status_100__data,
             method: str = "GET",
             url: str = None,
+            params: Any = None,
             headers: Any = None,
             **kwargs
     ):
@@ -365,11 +370,12 @@ class Api(object):
             url = f"/{url}" if not url.startswith("/") else url
             url = f"{self.base_url}{url}"
         if is_with_token:
-            headers = self.headers(headers=headers, is_with_token=is_with_token)
+            headers = self.get_headers(headers=headers, is_with_token=is_with_token)
         return request(
             response_callable=response_callable,
             method=method,
             url=url,
+            params=params,
             headers=headers,
             **kwargs
         )
