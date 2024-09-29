@@ -37,7 +37,7 @@ class ResponseCallable(ResponseCallable):
         return isinstance(text, str) and text.startswith("null")
 
     @staticmethod
-    def json_addict__status_100__data(response: Response = None, status_code: int = 200):
+    def json_addict__status_is_100__data(response: Response = None, status_code: int = 200):
         json_addict = ResponseCallable.json_addict(response=response, status_code=status_code)
         if Draft202012Validator({
             "type": "object",
@@ -253,7 +253,7 @@ class Api(object):
             return self
         token_data = self.post(
             is_with_token=False,
-            response_callable=ResponseCallable.json_addict__status_100__data,
+            response_callable=ResponseCallable.json_addict__status_is_100__data,
             url=f"{UrlsSetting.LOGIN}",
             data={
                 "username": self.username,
@@ -294,7 +294,7 @@ class Api(object):
     def get(
             self,
             is_with_token=True,
-            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             url: str = None,
             params: Any = None,
             headers: Any = None,
@@ -313,7 +313,7 @@ class Api(object):
     def post(
             self,
             is_with_token=True,
-            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             url: str = None,
             params: Any = None,
             data: Any = None,
@@ -336,7 +336,7 @@ class Api(object):
     def put(
             self,
             is_with_token=True,
-            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             url: str = None,
             params: Any = None,
             data: Any = None,
@@ -359,7 +359,7 @@ class Api(object):
     def request(
             self,
             is_with_token=True,
-            response_callable: Callable = ResponseCallable.json_addict__status_100__data,
+            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
             method: str = "GET",
             url: str = None,
             params: Any = None,
