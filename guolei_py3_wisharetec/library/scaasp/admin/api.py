@@ -93,7 +93,7 @@ class Api(object):
 
     def __init__(
             self,
-            base_url: str = "https://sq.wisharetec.com",
+            base_url: str = "https://sq.wisharetec.com/",
             username: str = None,
             password: str = None,
             cache_instance: Union[diskcache.Cache, redis.Redis, redis.StrictRedis] = None
@@ -117,7 +117,7 @@ class Api(object):
         基础url
         :return:
         """
-        return self._base_url
+        return self._base_url[:-1] if self._base_url.endswith("/") else self._base_url
 
     @base_url.setter
     def base_url(self, base_url):
