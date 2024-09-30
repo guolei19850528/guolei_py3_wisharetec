@@ -9,59 +9,40 @@ github:[https://github.com/guolei19850528/guolei_py3_wisharetec]
 =================================================
 """
 import hashlib
-import pathlib
 from datetime import timedelta
-from typing import Union, Callable, Iterator, Any
+from typing import Union, Callable
 
 import diskcache
 import redis
 import requests
-from addict import Dict
-from jsonschema.validators import Draft202012Validator, validate
-
-from guolei_py3_requests.library import (
-    request,
-    ResponseCallable
-)
+from jsonschema.validators import Draft202012Validator
 from requests import Response
 
 
-class ResponseCallable(ResponseCallable):
+class ResponseCallable(object):
     """
     Response Callable Class
     """
 
     @staticmethod
-    def text__start_with_null(response: Response = None, status_code: int = 200):
-        text = ResponseCallable.text(response=response, status_code=status_code)
-        return isinstance(text, str) and text.startswith("null")
+    def text_start_with_null(response: Response = None, status_code: int = 200):
+        text = response.text if response.status_code == status_code else ""
+        return isinstance(text, str) and text.lower().startswith("null")
 
     @staticmethod
-    def json_addict__status_is_100__data(response: Response = None, status_code: int = 200):
-        json_addict = ResponseCallable.json_addict(response=response, status_code=status_code)
-        if Draft202012Validator({
-            "type": "object",
-            "properties": {
-                "status": {
-                    "oneOf": [
-                        {"type": "integer", "const": 100},
-                        {"type": "string", "const": "100"},
-                    ],
-                },
-            },
-            "required": ["status", "data"]
-        }).is_valid(json_addict):
-            return json_addict.data
-        return Dict()
+    def json_status_100_data(response: Response = None, status_code: int = 200):
+        json_data = response.json() if response.status_code == status_code else dict()
+        if int(json_data.get("status", -1)) == 100:
+            return json_data.get("data", dict())
+        None
 
 
-class UrlsSetting:
+class UrlSetting(object):
     """
-    Urls Settings Class
+    Url Settings
     """
-
-    QUERY_LOGIN_STATE: str = "/old/serverUserAction!checkSession.action"
     LOGIN: str = "/manage/login"
+    QUERY_LOGIN_STATE: str = "/old/serverUserAction!checkSession.action"
     QUERY_COMMUNITY_BY_PAGINATOR: str = "/manage/communityInfo/getAdminCommunityList"
     QUERY_COMMUNITY_DETAIL: str = "/manage/communityInfo/getCommunityInfo"
     QUERY_ROOM_BY_PAGINATOR: str = "/manage/communityRoom/listCommunityRoom"
@@ -102,6 +83,7 @@ class UrlsSetting:
     QUERY_PARKING_AUTH_AUDIT_CHECK_BY_PAGINATOR: str = "/manage/carParkApplication/getParkingCheckList"
     UPDATE_PARKING_AUTH_AUDIT_STATUS: str = "/manage/carParkApplication/completeTask"
     QUERY_EXPORT_BY_PAGINATOR: str = "/manage/export/log"
+    UPLOAD: str = "/upload"
 
 
 class Api(object):
@@ -111,13 +93,13 @@ class Api(object):
 
     def __init__(
             self,
-            base_url: str = "https://sq.wisharetec.com/",
+            base_url: str = "https://sq.wisharetec.com",
             username: str = None,
             password: str = None,
             cache_instance: Union[diskcache.Cache, redis.Redis, redis.StrictRedis] = None
     ):
         """
-        Api 构造函数
+        构造函数
         :param base_url: 基础url
         :param username: 用户名
         :param password: 密码
@@ -127,7 +109,7 @@ class Api(object):
         self._username = username
         self._password = password
         self._cache_instance = cache_instance
-        self._token_data = Dict()
+        self._token_data = dict()
 
     @property
     def base_url(self):
@@ -135,7 +117,7 @@ class Api(object):
         基础url
         :return:
         """
-        return self._base_url[:-1] if self._base_url.endswith("/") else self._base_url
+        return self._base_url
 
     @base_url.setter
     def base_url(self, base_url):
@@ -203,7 +185,7 @@ class Api(object):
         token 数据
         :return:
         """
-        return Dict(self._token_data) if isinstance(self._token_data, dict) else Dict()
+        return self._token_data or dict()
 
     @token_data.setter
     def token_data(self, token_data):
@@ -214,52 +196,185 @@ class Api(object):
         """
         self._token_data = token_data
 
-    def headers(self, headers: dict = None, is_with_token: bool = True):
-        headers = Dict(headers) if headers else Dict()
-        if is_with_token:
-            headers.setdefault("Token", self.token_data.get("token", ""))
-            headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
-        return headers.to_dict()
-
-    def login(self, login_callable: Callable = None):
+    def get_token_data_by_cache(self, name: str = None):
         """
-        登录
-        :param login_callable: 自定义回调 custom_callable(self) if isinstance(custom_callable, Callable)
-        :return: custom_callable(self) if isinstance(custom_callable, Callable) else self
-        """
-        if isinstance(login_callable, Callable):
-            return login_callable(self)
-        validate(instance=self.base_url, schema={"type": "string", "minLength": 1, "pattern": "^http"})
-        validate(instance=self.username, schema={"type": "string", "minLength": 1})
-        validate(instance=self.password, schema={"type": "string", "minLength": 1})
-        # 缓存key
-        cache_key = f"guolei_py3_wisharetec_token_data__{self.username}"
-        # 使用缓存
-        if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
-            if isinstance(self.cache_instance, diskcache.Cache):
-                self.token_data = self.cache_instance.get(cache_key)
-            if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
-                self.token_data = self.cache_instance.hgetall(cache_key)
+        get token data by cache
 
-        # 用户是否登录
-        result = self.get(
-            response_callable=ResponseCallable.text__start_with_null,
-            url=f"{UrlsSetting.QUERY_LOGIN_STATE}",
-            verify=False,
-            timeout=(60, 60)
+        if isinstance(self.cache_instance,(diskcache.Cache,redis.Redis,redis.StrictRedis)): usage cache
+
+        :param name: cache key
+        :return: token data
+        """
+        name = name or f"guolei_py3_wisharetec_token_data__{self.username}"
+        if isinstance(self.cache_instance, diskcache.Cache):
+            self.token_data = self.cache_instance.get(key=name)
+        if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
+            self.token_data = self.cache_instance.hgetall(name=name)
+        return self.token_data or dict()
+
+    def put_token_data_to_cache(
+            self, name: str = None,
+            expire: Union[float, int, timedelta] = None,
+            token_data: dict = None
+    ):
+        """
+        put token data into cache
+
+        if isinstance(self.cache_instance,(diskcache.Cache,redis.Redis,redis.StrictRedis)): usage cache
+        :param name: cache key
+        :param expire: cache expire time
+        :param token_data: token data
+        :return:
+        """
+        token_data = token_data or self.token_data
+        name = name or f"guolei_py3_wisharetec_token_data__{self.username}"
+        if isinstance(self.cache_instance, diskcache.Cache):
+            return self.cache_instance.set(
+                key=name,
+                value=token_data,
+                expire=expire or timedelta(days=30).total_seconds()
+            )
+
+        if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
+            self.cache_instance.hset(
+                name=name,
+                mapping=token_data
+            )
+            self.cache_instance.expire(
+                name=name,
+                time=expire or timedelta(days=30)
+            )
+            return True
+        return False
+
+    def get(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None, **kwargs):
+        """
+        execute get by requests.get
+
+        headers.setdefault("Token", self.token_data.get("token", ""))
+
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+
+        :param on_response_callback: response callback
+        :param path: if url is None: url=f"{self.base_url}{path}"
+        :param kwargs: requests.get(**kwargs)
+        :return: on_response_callback(response) or response
+        """
+        path = kwargs.get("url", None) or f"{self.base_url}{path}"
+        headers = kwargs.get("headers", dict())
+        headers.setdefault("Token", self.token_data.get("token", ""))
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        kwargs.update([
+            ("headers", headers),
+            ("url", path),
+        ])
+        response = requests.get(**kwargs)
+        if isinstance(on_response_callback, Callable):
+            return on_response_callback(response)
+        return response
+
+    def post(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None, **kwargs):
+        """
+        execute post by requests.post
+
+        headers.setdefault("Token", self.token_data.get("token", ""))
+
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+
+        :param on_response_callback: response callback
+        :param path: if url is None: url=f"{self.base_url}{path}"
+        :param kwargs: requests.get(**kwargs)
+        :return: on_response_callback(response) or response
+        """
+        path = kwargs.get("url", None) or f"{self.base_url}{path}"
+        headers = kwargs.get("headers", dict())
+        headers.setdefault("Token", self.token_data.get("token", ""))
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        kwargs.update([
+            ("headers", headers),
+            ("url", path),
+        ])
+        response = requests.post(**kwargs)
+        if isinstance(on_response_callback, Callable):
+            return on_response_callback(response)
+        return response
+
+    def put(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None, **kwargs):
+        """
+        execute put by requests.put
+
+        headers.setdefault("Token", self.token_data.get("token", ""))
+
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+
+        :param on_response_callback: response callback
+        :param path: if url is None: url=f"{self.base_url}{path}"
+        :param kwargs: requests.get(**kwargs)
+        :return: on_response_callback(response) or response
+        """
+        path = kwargs.get("url", None) or f"{self.base_url}{path}"
+        headers = kwargs.get("headers", dict())
+        headers.setdefault("Token", self.token_data.get("token", ""))
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        kwargs.update([
+            ("headers", headers),
+            ("url", path),
+        ])
+        response = requests.put(**kwargs)
+        if isinstance(on_response_callback, Callable):
+            return on_response_callback(response)
+        return response
+
+    def request(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None,
+                **kwargs):
+        """
+        execute request by requests.request
+
+        headers.setdefault("Token", self.token_data.get("token", ""))
+
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+
+        :param on_response_callback: response callback
+        :param path: if url is None: url=f"{self.base_url}{path}"
+        :param kwargs: requests.get(**kwargs)
+        :return: on_response_callback(response) or response
+        """
+        path = kwargs.get("url", None) or f"{self.base_url}{path}"
+        headers = kwargs.get("headers", dict())
+        headers.setdefault("Token", self.token_data.get("token", ""))
+        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
+        kwargs.update([
+            ("headers", headers),
+            ("url", path),
+        ])
+        response = requests.request(**kwargs)
+        if isinstance(on_response_callback, Callable):
+            return on_response_callback(response)
+        return response
+
+    def login(self):
+        """
+        execute login
+
+        if isinstance(self.cache_instance,(diskcache.Cache,redis.Redis,redis.StrictRedis)): usage cache
+
+        :return:
+        """
+        self.token_data = self.get_token_data_by_cache()
+        result: bool = self.get(
+            on_response_callback=ResponseCallable.text_start_with_null,
+            path=f"{UrlSetting.QUERY_LOGIN_STATE}"
         )
         if result:
             return self
-        result = self.post(
-            response_callable=ResponseCallable.json_addict__status_is_100__data,
-            url=f"{UrlsSetting.LOGIN}",
+        result: dict = self.post(
+            on_response_callback=ResponseCallable.json_status_100_data,
+            path=f"{UrlSetting.LOGIN}",
             data={
                 "username": self.username,
                 "password": hashlib.md5(self.password.encode("utf-8")).hexdigest(),
                 "mode": "PASSWORD",
-            },
-            verify=False,
-            timeout=(60, 60)
+            }
         )
         if Draft202012Validator({
             "type": "object",
@@ -270,103 +385,5 @@ class Api(object):
             "required": ["token", "companyCode"],
         }).is_valid(result):
             self.token_data = result
-            # 缓存处理
-            if isinstance(self.cache_instance, (diskcache.Cache, redis.Redis, redis.StrictRedis)):
-                if isinstance(self.cache_instance, diskcache.Cache):
-                    self.cache_instance.set(
-                        key=cache_key,
-                        value=self.token_data,
-                        expire=timedelta(days=30).total_seconds()
-                    )
-                if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
-                    self.cache_instance.hset(
-                        name=cache_key,
-                        mapping=self.token_data
-                    )
-                    self.cache_instance.expire(
-                        name=cache_key,
-                        time=timedelta(days=30)
-                    )
+            self.put_token_data_to_cache()
         return self
-
-    def get(
-            self,
-            is_with_token=True,
-            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
-            url: str = None,
-            params: Any = None,
-            headers: Any = None,
-            **kwargs: Any
-    ):
-        return self.request(
-            response_callable=response_callable,
-            method="GET",
-            url=url,
-            params=params,
-            headers=headers,
-            **kwargs
-        )
-
-    def post(
-            self,
-            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
-            url: str = None,
-            params: Any = None,
-            data: Any = None,
-            json: Any = None,
-            headers: Any = None,
-            **kwargs: Any
-    ):
-        return self.request(
-            response_callable=response_callable,
-            method="POST",
-            url=url,
-            params=params,
-            data=data,
-            json=json,
-            headers=headers,
-            **kwargs
-        )
-
-    def put(
-            self,
-            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
-            url: str = None,
-            params: Any = None,
-            data: Any = None,
-            json: Any = None,
-            headers: Any = None,
-            **kwargs: Any
-    ):
-        return self.request(
-            response_callable=response_callable,
-            method="PUT",
-            url=url,
-            params=params,
-            data=data,
-            json=json,
-            headers=headers,
-            **kwargs
-        )
-
-    def request(
-            self,
-            response_callable: Callable = ResponseCallable.json_addict__status_is_100__data,
-            method: str = "GET",
-            url: str = None,
-            params: Any = None,
-            headers: Any = None,
-            **kwargs
-    ):
-        if not Draft202012Validator({"type": "string", "minLength": 1, "pattern": "^http"}).is_valid(url):
-            url = f"/{url}" if not url.startswith("/") else url
-            url = f"{self.base_url}{url}"
-        headers = self.headers(headers=headers)
-        return request(
-            response_callable=response_callable,
-            method=method,
-            url=url,
-            params=params,
-            headers=headers,
-            **kwargs
-        )
