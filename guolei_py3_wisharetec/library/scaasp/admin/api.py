@@ -15,26 +15,66 @@ from typing import Union, Callable
 import diskcache
 import redis
 import requests
-from jsonschema.validators import Draft202012Validator
+from addict import Dict
+from guolei_py3_requests.library import ResponseCallback, Request
+from jsonschema.validators import Draft202012Validator, validate
 from requests import Response
 
 
-class ResponseCallable(object):
+class ResponseCallback(ResponseCallback):
     """
     Response Callable Class
     """
 
     @staticmethod
     def text_start_with_null(response: Response = None, status_code: int = 200):
-        text = response.text if response.status_code == status_code else ""
+        text = ResponseCallback.text(response=response, status_code=status_code)
         return isinstance(text, str) and text.lower().startswith("null")
 
     @staticmethod
     def json_status_100_data(response: Response = None, status_code: int = 200):
-        json_data = response.json() if response.status_code == status_code else dict()
-        if int(json_data.get("status", -1)) == 100:
-            return json_data.get("data", dict())
-        None
+        json_addict = ResponseCallback.json_addict(response=response, status_code=status_code)
+        if Draft202012Validator({
+            "type": "object",
+            "properties": {
+                "status": {
+                    "oneOf": [
+                        {"type": "integer", "const": 100},
+                        {"type": "string", "const": "100"},
+                    ]
+                }
+            },
+            "required": ["status", "data"],
+        }).is_valid(json_addict):
+            return json_addict.data
+        return None
+
+    def json_status_100_data_resultlist(response: Response = None, status_code: int = 200):
+        json_addict = ResponseCallback.json_addict(response=response, status_code=status_code)
+        if Draft202012Validator({
+            "type": "object",
+            "properties": {
+                "status": {
+                    "oneOf": [
+                        {"type": "integer", "const": 100},
+                        {"type": "string", "const": "100"},
+                    ]
+                },
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "resultList": {
+                            "type": "array",
+                            "minItems": 1,
+                        },
+                        "required": ["resultList"]
+                    }
+                }
+            },
+            "required": ["status", "data"],
+        }).is_valid(json_addict):
+            return json_addict.data.resultList
+        return None
 
 
 class UrlSetting(object):
@@ -86,7 +126,7 @@ class UrlSetting(object):
     UPLOAD: str = "/upload"
 
 
-class Api(object):
+class Api(Request):
     """
     智慧社区全域服务平台 Admin API Class
     """
@@ -105,11 +145,12 @@ class Api(object):
         :param password: 密码
         :param cache_instance: 缓存实例
         """
+        super().__init__()
         self._base_url = base_url
         self._username = username
         self._password = password
         self._cache_instance = cache_instance
-        self._token_data = dict()
+        self._token_data = Dict()
 
     @property
     def base_url(self):
@@ -185,7 +226,7 @@ class Api(object):
         token 数据
         :return:
         """
-        return self._token_data or dict()
+        return Dict(self._token_data)
 
     @token_data.setter
     def token_data(self, token_data):
@@ -194,7 +235,7 @@ class Api(object):
         :param token_data:
         :return:
         """
-        self._token_data = token_data
+        self._token_data = Dict(token_data)
 
     def get_token_data_by_cache(self, name: str = None):
         """
@@ -210,7 +251,7 @@ class Api(object):
             self.token_data = self.cache_instance.get(key=name)
         if isinstance(self.cache_instance, (redis.Redis, redis.StrictRedis)):
             self.token_data = self.cache_instance.hgetall(name=name)
-        return self.token_data or dict()
+        return Dict(self.token_data)
 
     def put_token_data_to_cache(
             self, name: str = None,
@@ -226,7 +267,16 @@ class Api(object):
         :param token_data: token data
         :return:
         """
-        token_data = token_data or self.token_data
+        token_data = Dict(self.token_data)
+        if not Draft202012Validator({
+            "type": "object",
+            "properties": {
+                "token": {"type": "string", "minLength": 1},
+                "companyCode": {"type": "string", "minLength": 1},
+            },
+            "required": ["name", "expire", "token_data"]
+        }).is_valid(token_data):
+            return False
         name = name or f"guolei_py3_wisharetec_token_data__{self.username}"
         if isinstance(self.cache_instance, diskcache.Cache):
             return self.cache_instance.set(
@@ -247,9 +297,9 @@ class Api(object):
             return True
         return False
 
-    def get(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None, **kwargs):
+    def get(self, on_response_callback: Callable = ResponseCallback.json_status_100_data, path: str = None, **kwargs):
         """
-        execute get by requests.get
+        execute Request.get()
 
         headers.setdefault("Token", self.token_data.get("token", ""))
 
@@ -260,20 +310,17 @@ class Api(object):
         :param kwargs: requests.get(**kwargs)
         :return: on_response_callback(response) or response
         """
-        path = kwargs.get("url", None) or f"{self.base_url}{path}"
-        headers = kwargs.get("headers", dict())
-        headers.setdefault("Token", self.token_data.get("token", ""))
-        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
-        kwargs.update([
-            ("headers", headers),
-            ("url", path),
-        ])
-        response = requests.get(**kwargs)
-        if isinstance(on_response_callback, Callable):
-            return on_response_callback(response)
-        return response
+        kwargs = Dict(kwargs)
+        kwargs.setdefault("url", f"{self.base_url}{path}")
+        kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", "")
+            }
+        })
+        return super().get(on_response_callback=on_response_callback, **kwargs.to_dict())
 
-    def post(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None, **kwargs):
+    def post(self, on_response_callback: Callable = ResponseCallback.json_status_100_data, path: str = None, **kwargs):
         """
         execute post by requests.post
 
@@ -286,20 +333,18 @@ class Api(object):
         :param kwargs: requests.get(**kwargs)
         :return: on_response_callback(response) or response
         """
-        path = kwargs.get("url", None) or f"{self.base_url}{path}"
-        headers = kwargs.get("headers", dict())
-        headers.setdefault("Token", self.token_data.get("token", ""))
-        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
-        kwargs.update([
-            ("headers", headers),
-            ("url", path),
-        ])
-        response = requests.post(**kwargs)
-        if isinstance(on_response_callback, Callable):
-            return on_response_callback(response)
-        return response
 
-    def put(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None, **kwargs):
+        kwargs = Dict(kwargs)
+        kwargs.setdefault("url", f"{self.base_url}{path}")
+        kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", "")
+            }
+        })
+        return super().post(on_response_callback=on_response_callback, **kwargs.to_dict())
+
+    def put(self, on_response_callback: Callable = ResponseCallback.json_status_100_data, path: str = None, **kwargs):
         """
         execute put by requests.put
 
@@ -312,20 +357,17 @@ class Api(object):
         :param kwargs: requests.get(**kwargs)
         :return: on_response_callback(response) or response
         """
-        path = kwargs.get("url", None) or f"{self.base_url}{path}"
-        headers = kwargs.get("headers", dict())
-        headers.setdefault("Token", self.token_data.get("token", ""))
-        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
-        kwargs.update([
-            ("headers", headers),
-            ("url", path),
-        ])
-        response = requests.put(**kwargs)
-        if isinstance(on_response_callback, Callable):
-            return on_response_callback(response)
-        return response
+        kwargs = Dict(kwargs)
+        kwargs.setdefault("url", f"{self.base_url}{path}")
+        kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", "")
+            }
+        })
+        return super().put(on_response_callback=on_response_callback, **kwargs.to_dict())
 
-    def request(self, on_response_callback: Callable = ResponseCallable.json_status_100_data, path: str = None,
+    def request(self, on_response_callback: Callable = ResponseCallback.json_status_100_data, path: str = None,
                 **kwargs):
         """
         execute request by requests.request
@@ -339,18 +381,15 @@ class Api(object):
         :param kwargs: requests.get(**kwargs)
         :return: on_response_callback(response) or response
         """
-        path = kwargs.get("url", None) or f"{self.base_url}{path}"
-        headers = kwargs.get("headers", dict())
-        headers.setdefault("Token", self.token_data.get("token", ""))
-        headers.setdefault("Companycode", self.token_data.get("companyCode", ""))
-        kwargs.update([
-            ("headers", headers),
-            ("url", path),
-        ])
-        response = requests.request(**kwargs)
-        if isinstance(on_response_callback, Callable):
-            return on_response_callback(response)
-        return response
+        kwargs = Dict(kwargs)
+        kwargs.setdefault("url", f"{self.base_url}{path}")
+        kwargs.headers = Dict({
+            **{
+                "Token": self.token_data.get("token", ""),
+                "Companycode": self.token_data.get("companyCode", "")
+            }
+        })
+        return super().request(on_response_callback=on_response_callback, **kwargs.to_dict())
 
     def login(self):
         """
@@ -362,13 +401,13 @@ class Api(object):
         """
         self.token_data = self.get_token_data_by_cache()
         result: bool = self.get(
-            on_response_callback=ResponseCallable.text_start_with_null,
+            on_response_callback=ResponseCallback.text_start_with_null,
             path=f"{UrlSetting.QUERY_LOGIN_STATE}"
         )
         if result:
             return self
         result: dict = self.post(
-            on_response_callback=ResponseCallable.json_status_100_data,
+            on_response_callback=ResponseCallback.json_status_100_data,
             path=f"{UrlSetting.LOGIN}",
             data={
                 "username": self.username,
